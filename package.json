@@ -1,0 +1,40 @@
+{
+  "name": "autobot",
+  "description": "",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shk1447/autobot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/shk1447/autobot/issues"
+  },
+  "homepage": "https://github.com/shk1447/autobot#readme",
+  "dependencies": {
+    "electron": "12.2.3",
+    "iohook": "^0.9.3",
+    "node-abi": "^3.31.0",
+    "robotjs": "^0.6.0"
+  },
+  "iohook": {
+    "targets": [
+      "node-88",
+      "electron-87"
+    ],
+    "platforms": [
+      "win32",
+      "darwin",
+      "linux"
+    ],
+    "arches": [
+      "x64",
+      "ia32"
+    ]
+  }
+}
