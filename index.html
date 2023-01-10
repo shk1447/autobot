@@ -10,7 +10,7 @@
     <div x-data="{ open: false }">
       <button @click="open = !open">Expand</button>
 
-      <span x-show="open"> Content... </span>
+      <span x-show="open" x-html="" x-text="$store.state.test"></span>
     </div>
     <!-- You can also require other files to run in this process -->
     <script src="./renderer.js"></script>

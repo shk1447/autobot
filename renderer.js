@@ -5,4 +5,9 @@
  * `contextIsolation` is turned on. Use the contextBridge API in `preload.js`
  * to expose Node.js functionality from the main process.
  */
-"use strict";
+
+document.addEventListener("alpine:init", () => {
+  Alpine.store("state", {
+    test: "test",
+  });
+});
