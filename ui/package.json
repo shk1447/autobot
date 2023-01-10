@@ -20,6 +20,7 @@
     "@fortawesome/free-brands-svg-icons": "^6.2.1",
     "@fortawesome/free-regular-svg-icons": "^6.2.1",
     "@fortawesome/free-solid-svg-icons": "^6.2.1",
+    "@shaun/alpinejs-router": "^1.2.13",
     "alpinejs": "^3.10.5",
     "electron": "12.2.3"
   }
