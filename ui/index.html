@@ -8,19 +8,29 @@
     <title>Vite + TS</title>
   </head>
   <body>
-    <div x-data>
-      <h1>
-        Welcome to the
-        <span x-text="$store.shop.name">shop-name</span>
-      </h1>
-      <div>
-        Here you can buy:
-        <ul>
-          <template x-for="product in $store.shop.products">
-            <li x-text="product"></li>
-          </template>
-        </ul>
+    <div x-data style="display: flex; flex-direction: column; gap: 0px">
+      <div
+        x-data
+        style="
+          display: flex;
+          gap: 4px;
+          align-items: center;
+          height: 32px;
+          padding: 0px 8px;
+          background: #292d3e;
+          color: white;
+          user-select: none;
+        "
+      >
+        <div x-text="$store.header.title"></div>
+        <div style="flex: 1; -webkit-app-region: drag; height: 100%"></div>
+        <div @click="$store.header.exit()">
+          <i class="fa-solid fa-xmark"></i>
+        </div>
       </div>
+      <div x-data style="flex: 1"></div>
+
+      <div x-data></div>
     </div>
     <script type="module" src="/src/main.ts"></script>
   </body>

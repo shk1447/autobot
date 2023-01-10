@@ -1,36 +1,30 @@
 import "./style.css";
-
+import { ipcRenderer } from "electron";
 import Alpine from "alpinejs";
-
+import "@fortawesome/fontawesome-free/js/all.js";
 window.Alpine = Alpine;
 
-Alpine.store("shop", {
-  name: "Alpine-Shop",
-  products: ["Swiss Alp Chocolate", "Car Alpine A110"],
+interface IHeader {
+  title: string;
+  exit: () => void;
+}
+
+Alpine.store("header", {
+  title: "AUTO SYSTEM",
+  exit: async () => {
+    const result = await ipcRenderer.invoke("exit");
+    console.log(result);
+  },
+} as IHeader);
+let count = 0;
+setInterval(() => {
+  const headerStore = Alpine.store("header") as IHeader;
+  headerStore.title = count.toString();
+  count++;
+}, 1000);
+
+Alpine.store("footer", {
+  status: async () => {},
 });
 
 Alpine.start();
-
-// import typescriptLogo from "./typescript.svg";
-// import { setupCounter } from "./counter";
-
-// document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
-//   <div>
-//     <a href="https://vitejs.dev" target="_blank">
-//       <img src="./vite.svg" class="logo" alt="Vite logo" />
-//     </a>
-//     <a href="https://www.typescriptlang.org/" target="_blank">
-//       <img src="${typescriptLogo}" class="logo vanilla" alt="TypeScript logo" />
-//     </a>
-//     <h1>Vite + TypeScript</h1>
-//     <div class="card">
-//       <button id="counter" type="button"></button>
-//     </div>
-//     <p class="read-the-docs">
-//       Click on the Vite and TypeScript logos to learn more
-//     </p>
-
-//   </div>
-// `;
-
-// setupCounter(document.querySelector<HTMLButtonElement>("#counter")!);

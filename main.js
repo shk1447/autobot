@@ -1,25 +1,32 @@
 // Modules to control application life and create native browser window
-const { app, BrowserWindow } = require("electron");
+const { app, BrowserWindow, ipcMain } = require("electron");
 const path = require("path");
 
-const ioHook = require("iohook");
+// const ioHook = require("iohook");
 
-ioHook.on("mousemove", (event) => {
-  console.log(event);
-});
+// ioHook.on("mousemove", (event) => {
+//   console.log(event);
+// });
 
-ioHook.on("keydown", (event) => {
-  console.log(event);
-});
+// ioHook.on("keydown", (event) => {
+//   console.log(event);
+// });
 
-ioHook.start();
-ioHook.start(true);
+// ioHook.start();
+// ioHook.start(true);
 
 function createWindow() {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 500,
+    height: 300,
+    minWidth: 500,
+    minHeight: 300,
+    kiosk: false,
+    fullscreen: false,
+    resizable: false,
+    frame: false,
+    show: true,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       blinkFeatures: "CSSStickyPosition",
@@ -34,10 +41,9 @@ function createWindow() {
 
   // and load the index.html of the app.
   mainWindow.loadFile("./dist/index.html");
-  mainWindow.webContents.openDevTools();
 
   // Open the DevTools.
-  // mainWindow.webContents.openDevTools()
+  mainWindow.webContents.openDevTools();
 }
 
 // This method will be called when Electron has finished
@@ -62,3 +68,7 @@ app.on("window-all-closed", function () {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
+ipcMain.handle("exit", async (event, args) => {
+  console.log(event, args);
+  return true;
+});
