@@ -17,13 +17,17 @@
   },
   "homepage": "https://github.com/shk1447/autobot#readme",
   "dependencies": {
+    "@jitsi/robotjs": "^0.6.11",
     "electron": "12.2.3",
+    "fs-extra": "^11.1.0",
     "iohook": "^0.9.3",
-    "node-abi": "^3.31.0",
-    "robotjs": "^0.6.0"
+    "jimp": "^0.16.2",
+    "lodash": "^4.17.21",
+    "node-abi": "^3.31.0"
   },
   "iohook": {
     "targets": [
+      "node-83",
       "node-88",
       "electron-87"
     ],

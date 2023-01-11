@@ -5,10 +5,19 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>Vite + TS</title>
+    <title>Auto Capture System</title>
   </head>
-  <body>
-    <div x-data style="display: flex; flex-direction: column; gap: 0px">
+  <body x-data>
+    <div
+      x-data
+      style="
+        display: flex;
+        flex-direction: column;
+        gap: 0px;
+        height: 100%;
+        border: 2px solid #29303e;
+      "
+    >
       <div
         x-data
         style="
@@ -19,18 +28,93 @@
           padding: 0px 8px;
           background: #292d3e;
           color: white;
-          user-select: none;
+          width: 100%;
         "
       >
         <div x-text="$store.header.title"></div>
-        <div style="flex: 1; -webkit-app-region: drag; height: 100%"></div>
-        <div @click="$store.header.exit()">
+        <div
+          style="
+            flex: 1;
+            -webkit-app-region: drag;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+          "
+        ></div>
+        <button class="btn" @click="$store.header.exit()">
           <i class="fa-solid fa-xmark"></i>
-        </div>
+        </button>
       </div>
       <div x-data style="flex: 1"></div>
 
-      <div x-data></div>
+      <div
+        x-data
+        style="
+          height: 32px;
+          padding: 0px 8px;
+          background: #292d3e;
+          color: white;
+          display: flex;
+          align-items: center;
+          gap: 4px;
+        "
+        @mouseenter="$store.electron.through(false)"
+        @mouseleave="$store.electron.through(true)"
+      >
+        <div style="display: flex; align-items: center; gap: 4px">
+          <button
+            type="button"
+            class="btn"
+            @click="$store.footer.play()"
+            :disabled="$store.electron.isCapture"
+          >
+            <i class="fa-solid fa-play"></i> PLAY
+          </button>
+          <label class="switch">
+            <input type="checkbox" @change="$store.electron.toggleCapture()" />
+            <span class="slider"></span>
+          </label>
+          <span
+            style="font-weight: bold"
+            x-text="$store.electron.isCapture ? 'Capturing...' : 'Preparing...'"
+          ></span>
+        </div>
+        <div style="flex: 1"></div>
+        <!-- <button class="btn" @click="$store.footer.snapshot();">
+          <i class="fa-solid fa-camera"></i> SNAPSHOT
+        </button> -->
+        <button class="btn">
+          <i class="fa-regular fa-floppy-disk"></i> SAVE
+        </button>
+        <button class="btn" @click="$store.footer.toggleSetting()">
+          <i class="fa-solid fa-gear"></i>
+        </button>
+      </div>
+    </div>
+    <div
+      x-data
+      :class="$store.footer.setting ? 'w3-sidebar w3-bar-block w3-card open-panel' : 'w3-sidebar w3-bar-block w3-card close-panel'"
+      style="
+        right: 2px;
+        top: 34px;
+        height: calc(100% - 68px);
+        background: #1f2331;
+        color: white;
+      "
+    >
+      <!-- <a href="#" class="w3-bar-item w3-button">Link 1</a>
+      <a href="#" class="w3-bar-item w3-button">Link 2</a>
+      <div class="w3-dropdown-hover">
+        <button class="w3-button">
+          Dropdown
+          <i class="fa fa-caret-down"></i>
+        </button>
+        <div class="w3-dropdown-content w3-bar-block">
+          <a href="#" class="w3-bar-item w3-button">Link</a>
+          <a href="#" class="w3-bar-item w3-button">Link</a>
+        </div>
+      </div>
+      <a href="#" class="w3-bar-item w3-button">Link 3</a> -->
     </div>
     <script type="module" src="/src/main.ts"></script>
   </body>

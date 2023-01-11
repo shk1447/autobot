@@ -6,8 +6,136 @@ body {
   margin: 0;
   padding: 0;
   font-size: 11px;
+  background: transparent;
 }
 
 * {
   box-sizing: border-box;
+  font-size: 11px;
+}
+button:focus {
+  outline: 0;
+}
+.btn {
+  background-color: #383f66;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 4px 8px;
+  font-size: 10px;
+  user-select: none;
+  display: flex;
+  gap: 4px;
+  height: 20px;
+  align-items: center;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Darker background on mouse-over */
+.btn:hover {
+  background-color: #424d64;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #383f66;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 12px;
+  width: 14px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+}
+
+input:checked + .slider {
+  background-color: #3f61aa;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #3f61aa;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(14px);
+  -ms-transform: translateX(14px);
+  transform: translateX(14px);
+}
+
+.detecting {
+  filter: blur(0.1em);
+  animation-name: blink;
+  animation-duration: 1s;
+  animation-iteration-count: infinite;
+}
+
+.open-panel {
+  width: 30%;
+  animation-name: open-panel;
+  animation-duration: 0.5s;
+}
+
+.close-panel {
+  width: 0%;
+  animation-name: close-panel;
+  animation-duration: 0.5s;
+}
+
+@keyframes blink {
+  0% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.2;
+  }
+}
+
+@keyframes open-panel {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 30%;
+  }
+}
+
+@keyframes close-panel {
+  0% {
+    width: 30%;
+  }
+  100% {
+    width: 0%;
+  }
 }
