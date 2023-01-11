@@ -152,25 +152,24 @@ ipcMain.handle("play", async (event, args) => {
         break;
       }
       case "mouseclick": {
-        wait(0.5);
         const clickType =
           hook.button == 1 ? "left" : hook.button == 2 ? "right" : "middle";
         robot.mouseClick(clickType);
-        wait(0.5);
+        wait(0.25);
         break;
       }
       case "mousedown": {
         const clickType =
           hook.button == 1 ? "left" : hook.button == 2 ? "right" : "middle";
         robot.mouseToggle("down", clickType);
-        wait(0.5);
+        wait(0.25);
         break;
       }
       case "mouseup": {
         const clickType =
           hook.button == 1 ? "left" : hook.button == 2 ? "right" : "middle";
         robot.mouseToggle("up", clickType);
-        wait(0.5);
+        wait(0.25);
         break;
       }
       case "mousedrag": {

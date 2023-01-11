@@ -3,56 +3,70 @@ import "./w3.css";
 import { ipcRenderer } from "electron";
 import Alpine from "alpinejs";
 import "@fortawesome/fontawesome-free/js/all.js";
+
+import { registViewModel } from "property-process";
+
 window.Alpine = Alpine;
 
 interface IHeader {
+  init: () => void;
   title: string;
   exit: () => void;
 }
 
 interface IElectron {
+  init: () => void;
   isCapture: boolean;
+  toggleCapture: () => void;
+  through: (value: boolean) => void;
 }
 
 interface IFooter {
+  init: () => void;
+  setting: boolean;
   snapshot: () => void;
-  start: () => void;
+  play: () => void;
+  toggleSetting: (val: boolean) => void;
 }
-ipcRenderer.invoke("click-through", { through: false });
 
-Alpine.store("electron", {
+const { handler: HeaderViewModel } = registViewModel<IHeader>({
+  init() {
+    HeaderViewModel.property = this;
+    HeaderViewModel.reset();
+  },
+  title: "AUTO CAPTURE SYSTEM",
+  exit: async () => {
+    await ipcRenderer.invoke("exit");
+  },
+});
+
+const { handler: ElectronViewModel } = registViewModel<IElectron>({
+  init() {
+    ElectronViewModel.property = this;
+    ElectronViewModel.reset();
+  },
   isCapture: false,
   toggleCapture() {
     this.isCapture = !this.isCapture;
     if (this.isCapture) {
-      (Alpine.store("footer") as any).toggleSetting(false);
+      FooterViewModel.state.setting = false;
       ipcRenderer.invoke("record", true);
     } else {
       ipcRenderer.invoke("record", false);
     }
   },
-  through: async (value: boolean) => {
-    if ((Alpine.store("electron") as any).isCapture) {
+  async through(value: boolean) {
+    if (ElectronViewModel.property.isCapture) {
       await ipcRenderer.invoke("click-through", { through: value });
     }
   },
 });
 
-Alpine.store("header", {
-  title: "AUTO CAPTURE SYSTEM",
-  exit: async () => {
-    const result = await ipcRenderer.invoke("exit");
-    console.log(result);
+let { handler: FooterViewModel } = registViewModel<IFooter>({
+  init() {
+    FooterViewModel.property = this;
+    FooterViewModel.reset();
   },
-} as IHeader);
-// let count = 0;
-// setInterval(() => {
-//   const headerStore = Alpine.store("header") as IHeader;
-//   headerStore.title = count.toString();
-//   count++;
-// }, 1000);
-
-Alpine.store("footer", {
   snapshot: async () => {
     await ipcRenderer.invoke("capture");
   },
@@ -60,9 +74,17 @@ Alpine.store("footer", {
     await ipcRenderer.invoke("play");
   },
   setting: true,
-  toggleSetting(val) {
+  toggleSetting(val: boolean) {
     this.setting = val != undefined ? val : !this.setting;
   },
 });
+
+ipcRenderer.invoke("click-through", { through: false });
+
+Alpine.store("electron", ElectronViewModel.state);
+
+Alpine.store("header", HeaderViewModel.state);
+
+Alpine.store("footer", FooterViewModel.state);
 
 Alpine.start();
