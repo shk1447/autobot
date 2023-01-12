@@ -41,6 +41,9 @@
             background: transparent;
           "
         ></div>
+        <button class="btn" @click="$store.header.minimize()">
+          <i class="fa-solid fa-window-minimize"></i>
+        </button>
         <button class="btn" @click="$store.header.exit()">
           <i class="fa-solid fa-xmark"></i>
         </button>
@@ -83,7 +86,7 @@
         <button class="btn" @click="$store.footer.snapshot();">
           <i class="fa-solid fa-camera"></i> SNAPSHOT
         </button>
-        <button class="btn">
+        <button class="btn" @click="$store.footer.save({type:'new'});">
           <i class="fa-regular fa-floppy-disk"></i> SAVE
         </button>
         <button class="btn" @click="$store.footer.toggleSetting()">
@@ -100,8 +103,78 @@
         height: calc(100% - 68px);
         background: #1f2331;
         color: white;
+        overflow: hidden;
       "
     >
+      <div style="grid-template-rows:28px repeat(auto-fill, minmax(28px, 28px)); grid-template-columns: 36px auto 128px; display: grid; overflow:auto; height:100%; contain:strict; content-visibility: auto;">
+        <div style="display: contents;">
+          <div style="position:sticky; top:0; background: #2b314e; height:100%;display: flex; align-items: center; justify-content: center; padding:4px">No.</div>
+          <div style="position:sticky; top:0; background: #2b314e; height:100%;display: flex; align-items: center; justify-content: center; padding:4px">Name</div>
+          <div style="position:sticky; top:0; background: #2b314e; height:100%;display: flex; align-items: center; justify-content: center; padding:4px">
+              <button
+                type="button"
+                class="btn"
+                @click="$store.footer.play(-1)"
+                :disabled="$store.electron.isCapture"
+              >
+                <i class="fa-solid fa-play"></i>
+              </button>
+
+              <button
+                type="button"
+                class="btn"
+                :disabled="$store.electron.isCapture"
+              >
+              <i class="fa-solid fa-gear"></i>
+              </button>
+
+              <button
+                type="button"
+                class="btn"
+                @click="$store.footer.save({type:'remove'})"
+                :disabled="$store.electron.isCapture"
+              >
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+          </div>
+        </div>
+        <template x-for="(item,idx) in $store.electron.items">
+          <div style="display: contents;">
+            <div style="height:24px;display: flex; align-items: center; justify-content: center; padding:4px" x-text="idx+1"></div>
+            <div style="height:24px;display: flex; align-items: center; padding:4px">
+              <input type="text" style="width:100%; border: none; background: transparent; color:white;" x-model="item.name" @blur="$store.footer.save({type:'update',idx:idx, name:item.name})">
+            </div>
+            <div style="height:24px;display: flex; align-items: center; justify-content: center; padding:4px">
+              <button
+                type="button"
+                class="btn"
+                @click="$store.footer.play(idx)"
+                :disabled="$store.electron.isCapture"
+              >
+                <i class="fa-solid fa-play"></i>
+              </button>
+
+              <button
+                type="button"
+                class="btn"
+                
+                :disabled="$store.electron.isCapture"
+              >
+              <i class="fa-solid fa-gear"></i>
+              </button>
+
+              <button
+                type="button"
+                class="btn"
+                @click="$store.footer.save({type:'remove',idx:idx})"
+                :disabled="$store.electron.isCapture"
+              >
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </div>
+          </div>
+        </template>
+      </ul>
       <!-- <a href="#" class="w3-bar-item w3-button">Link 1</a>
       <a href="#" class="w3-bar-item w3-button">Link 2</a>
       <div class="w3-dropdown-hover">

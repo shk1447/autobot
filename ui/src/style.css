@@ -16,6 +16,9 @@ body {
 button:focus {
   outline: 0;
 }
+input:focus {
+  outline: 0;
+}
 .btn {
   background-color: #383f66;
   border: none;
@@ -99,15 +102,15 @@ input:checked + .slider:before {
 }
 
 .open-panel {
-  width: 30%;
+  width: 40%;
   animation-name: open-panel;
-  animation-duration: 0.5s;
+  animation-duration: 0.3s;
 }
 
 .close-panel {
   width: 0%;
   animation-name: close-panel;
-  animation-duration: 0.5s;
+  animation-duration: 0.3s;
 }
 
 @keyframes blink {
@@ -127,15 +130,34 @@ input:checked + .slider:before {
     width: 0%;
   }
   100% {
-    width: 30%;
+    width: 40%;
   }
 }
 
 @keyframes close-panel {
   0% {
-    width: 30%;
+    width: 40%;
   }
   100% {
     width: 0%;
   }
+}
+::-webkit-scrollbar {
+  width: 0.6rem;
+  height: 0.6rem;
+}
+
+::-webkit-scrollbar-corner {
+}
+
+::-webkit-scrollbar-thumb {
+  z-index: 40;
+
+  border-color: transparent;
+
+  border-radius: 4px;
+
+  background-color: rgba(151, 151, 151, 0.4);
+
+  transition: 0.3s ease all;
 }
