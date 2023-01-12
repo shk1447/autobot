@@ -73,7 +73,7 @@ let { handler: FooterViewModel } = registViewModel<IFooter>({
   play: async () => {
     await ipcRenderer.invoke("play");
   },
-  setting: true,
+  setting: false,
   toggleSetting(val: boolean) {
     this.setting = val != undefined ? val : !this.setting;
   },

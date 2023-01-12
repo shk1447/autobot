@@ -7,6 +7,7 @@ const path = require("path");
 const fs = require("fs-extra");
 const ioHook = require("iohook");
 const robot = require("@jitsi/robotjs");
+const { compareSnapshotsPlugin } = require("./src/compare");
 
 let mainWindow;
 let currentThrough = false;
@@ -88,8 +89,10 @@ ipcMain.handle("capture", async (event, args) => {
   const bitmap = robot.screen.capture(x, y + 32, width, height - 64);
   new Jimp(
     { data: bitmap.image, width: bitmap.width, height: bitmap.height },
-    (err, image) => {
-      image.write("./test.png");
+    async (err, image) => {
+      await image.write("./actual.png");
+      const result = await compareSnapshotsPlugin();
+      console.log(result);
     }
   );
 });
@@ -108,12 +111,13 @@ ioHook.on("mousedrag", (event) => {
 });
 ioHook.on("mousedown", (event) => {
   hookArray.push(event);
+  console.log(event);
 });
 ioHook.on("mouseup", (event) => {
   hookArray.push(event);
 });
 ioHook.on("keydown", (event) => {
-  // console.log(event);
+  console.log(event);
 });
 
 ioHook.on("keyup", (event) => {
@@ -142,6 +146,7 @@ const wait = (sec) => {
 };
 
 ipcMain.handle("play", async (event, args) => {
+  mainWindow.setIgnoreMouseEvents(true, { forward: true });
   const clicks = hookArray.filter((d) => d.type == "mousedown");
   hookArray.splice(hookArray.indexOf(clicks[clicks.length - 1]), 3);
   for (var hook of hookArray) {
@@ -152,24 +157,25 @@ ipcMain.handle("play", async (event, args) => {
         break;
       }
       case "mouseclick": {
-        const clickType =
-          hook.button == 1 ? "left" : hook.button == 2 ? "right" : "middle";
-        robot.mouseClick(clickType);
-        wait(0.25);
+        // wait(0.4);
+        // const clickType =
+        //   hook.button == 1 ? "left" : hook.button == 2 ? "right" : "middle";
+        // robot.mouseClick(clickType);
         break;
       }
       case "mousedown": {
+        wait(0.4);
         const clickType =
           hook.button == 1 ? "left" : hook.button == 2 ? "right" : "middle";
         robot.mouseToggle("down", clickType);
-        wait(0.25);
+
         break;
       }
       case "mouseup": {
+        wait(0.4);
         const clickType =
           hook.button == 1 ? "left" : hook.button == 2 ? "right" : "middle";
         robot.mouseToggle("up", clickType);
-        wait(0.25);
         break;
       }
       case "mousedrag": {
@@ -192,4 +198,5 @@ ipcMain.handle("play", async (event, args) => {
       }
     }
   }
+  mainWindow.setIgnoreMouseEvents(false);
 });
