@@ -7,15 +7,9 @@ const pixelmatch = require("pixelmatch");
 const { adjustCanvas, parseImage, errorSerialize } = require("./utils");
 
 const compareSnapshotsPlugin = async (args) => {
-  const snapshotBaseDirectory = path.resolve(process.cwd(), "snapshots");
-  const snapshotDiffDirectory = path.join(process.cwd(), "snapshots", "diff");
   const alwaysGenerateDiff = true;
-  const allowVisualRegressionToFail = true;
-  const failSilently = true;
-  const errorThreshold = 50;
-  const specDirectory = "./spec";
 
-  const fileName = "test2333333";
+  const errorThreshold = 50;
 
   const options = {
     actualImage: args.actual,
@@ -55,16 +49,8 @@ const compareSnapshotsPlugin = async (args) => {
     percentage = (mismatchedPixels / diff.width / diff.height) ** 0.5;
 
     if (percentage > errorThreshold) {
-      const specFolder = path.join(snapshotDiffDirectory, specDirectory);
-
       diff.pack().pipe(fs.createWriteStream(options.diffImage));
-      if (!allowVisualRegressionToFail)
-        throw new Error(
-          `The "${fileName}" image is different. Threshold limit exceeded! \nExpected: ${errorThreshold} \nActual: ${percentage}`
-        );
     } else if (alwaysGenerateDiff) {
-      const specFolder = path.join(snapshotDiffDirectory, specDirectory);
-
       diff.pack().pipe(fs.createWriteStream(options.diffImage));
     }
   } catch (error) {

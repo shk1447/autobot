@@ -9,11 +9,31 @@ const ioHook = require("iohook");
 const robot = require("@jitsi/robotjs");
 const { compareSnapshotsPlugin } = require("./src/compare");
 const workerpool = require("workerpool");
-const { wait, pad } = require("./src/utils");
+const { wait, createFolder } = require("./src/utils");
 const { v4: uuidv4 } = require("uuid");
 const moment = require("moment");
 
-const pool = workerpool.pool(process.cwd() + "/src/macro.worker.js");
+const unhandled = require("electron-unhandled");
+
+unhandled({
+  logger: (err) => {
+    if (err) {
+      console.log(err);
+      app.quit();
+    }
+  },
+  showDialog: false,
+  reportButton: (error) => {
+    console.log("Report Button Initialized");
+  },
+});
+
+const userDataPath = path.resolve(app.getPath("userData"), "./AutoCapture");
+createFolder(userDataPath, true);
+
+const pool = workerpool.pool(
+  path.resolve(app.getAppPath(), "./src/macro.worker.js")
+);
 
 let mainWindow;
 let currentThrough = false;
@@ -48,9 +68,7 @@ function createWindow() {
   mainWindow.loadFile("./dist/index.html");
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools();
-  // mainWindow.setPosition();
-  // mainWindow.setSize();
+  // mainWindow.webContents.openDevTools();
 }
 
 // This method will be called when Electron has finished
@@ -129,7 +147,7 @@ ioHook.on("keyup", (event) => {
 
 robot.setMouseDelay(0);
 
-const dataPath = path.resolve(process.cwd(), "./data.json");
+const dataPath = path.resolve(userDataPath, "./data.json");
 if (!fs.existsSync(dataPath)) {
   fs.writeJSONSync(dataPath, { list: {} });
 }
@@ -189,7 +207,7 @@ ipcMain.handle("save", async (event, args) => {
           height: height,
         },
         path: {
-          directory: process.cwd(),
+          directory: userDataPath,
           base: `./snapshots/${uuid}/base.png`,
           actual: `./snapshots/${uuid}/actual.png`,
           diff: `./snapshots/${uuid}/diff.png`,
@@ -207,11 +225,11 @@ ipcMain.handle("save", async (event, args) => {
     case "remove": {
       if (args.uuid != undefined) {
         fs.removeSync(
-          path.resolve(process.cwd(), data.list[args.uuid].path.directory)
+          path.resolve(userDataPath, data.list[args.uuid].path.directory)
         );
         delete data.list[args.uuid];
       } else {
-        fs.removeSync(path.resolve(process.cwd(), "./snapshots"));
+        fs.removeSync(path.resolve(userDataPath, "./snapshots"));
         data.list = {};
       }
       break;
