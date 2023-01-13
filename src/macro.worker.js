@@ -9,7 +9,7 @@ const startMacro = (args) => {
   for (var hook of hooks) {
     switch (hook.type) {
       case "mousemove": {
-        wait(0.0005);
+        wait(0.0002);
         robot.moveMouse(hook.x, hook.y);
         break;
       }
@@ -26,7 +26,7 @@ const startMacro = (args) => {
         break;
       }
       case "mousedown": {
-        wait(0.5);
+        wait(0.4);
         const clickType =
           hook.button == 1 ? "left" : hook.button == 2 ? "right" : "middle";
         robot.mouseToggle("down", clickType);
@@ -34,19 +34,19 @@ const startMacro = (args) => {
         break;
       }
       case "mouseup": {
-        wait(0.5);
+        wait(0.4);
         const clickType =
           hook.button == 1 ? "left" : hook.button == 2 ? "right" : "middle";
         robot.mouseToggle("up", clickType);
         break;
       }
       case "mousedrag": {
-        wait(0.0005);
+        wait(0.0002);
         robot.dragMouse(hook.x, hook.y);
         break;
       }
       case "keyup": {
-        wait(0.0005);
+        wait(0.0002);
         if (hook.shiftKey || hook.altKey || hook.ctrlKey || hook.metaKey) {
           console.log("short cut!!! gogo");
         } else {

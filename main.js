@@ -97,6 +97,7 @@ ipcMain.handle("click-through", async (event, args) => {
 });
 
 let hookArray = [];
+let hookImage;
 ioHook.useRawcode(false);
 
 ioHook.on("mousemove", (event) => {
@@ -113,18 +114,17 @@ ioHook.on("mousedown", (event) => {
 });
 ioHook.on("mousewheel", (event) => {
   hookArray.push(event);
-  console.log(event);
 });
 
 ioHook.on("mouseup", (event) => {
   hookArray.push(event);
 });
 ioHook.on("keydown", (event) => {
-  console.log(event);
+  // NOTE: 나중에 작업하자...
 });
 
 ioHook.on("keyup", (event) => {
-  console.log(event);
+  // NOTE: 나중에 작업하자...
 });
 
 robot.setMouseDelay(0);
@@ -144,7 +144,6 @@ ipcMain.handle("capture", async (event, args) => {
   new Jimp(
     { data: bitmap.image, width: bitmap.width, height: bitmap.height },
     async (err, image) => {
-      console.log(image);
       await image.write(
         `./snapshots/${moment().format("YYYYMMDD_HHmmss")}.png`
       );
@@ -153,7 +152,6 @@ ipcMain.handle("capture", async (event, args) => {
 });
 
 ipcMain.handle("load", async (event, args) => {
-  console.log("load!!!");
   const ret_list = {};
   for (var key of Object.keys(data.list)) {
     ret_list[key] = {
@@ -164,7 +162,6 @@ ipcMain.handle("load", async (event, args) => {
       result: data.list[key].result,
     };
   }
-  console.log(hookArray.length);
   return {
     list: ret_list,
     current: {
@@ -174,7 +171,6 @@ ipcMain.handle("load", async (event, args) => {
 });
 
 ipcMain.handle("save", async (event, args) => {
-  console.log("save!!!");
   const [x, y] = mainWindow.getPosition();
   const [width, height] = mainWindow.getSize();
   switch (args.type) {
@@ -200,12 +196,7 @@ ipcMain.handle("save", async (event, args) => {
         },
         result: {},
       };
-      new Jimp(
-        { data: bitmap.image, width: bitmap.width, height: bitmap.height },
-        async (err, image) => {
-          await image.write(macro.path.base);
-        }
-      );
+      await hookImage.write(macro.path.base);
       data.list[uuid] = macro;
       break;
     }
@@ -214,7 +205,6 @@ ipcMain.handle("save", async (event, args) => {
       break;
     }
     case "remove": {
-      console.log(args);
       if (args.uuid != undefined) {
         fs.removeSync(
           path.resolve(process.cwd(), data.list[args.uuid].path.directory)
@@ -230,15 +220,26 @@ ipcMain.handle("save", async (event, args) => {
 
   fs.writeFileSync(dataPath, JSON.stringify(data));
   hookArray = [];
+  hookImage = undefined;
 });
 
 ipcMain.handle("record", async (event, args) => {
   if (args) {
     hookArray = [];
+    hookImage = undefined;
     ioHook.start();
     ioHook.start(true);
   } else {
     ioHook.stop();
+    const [x, y] = mainWindow.getPosition();
+    const [width, height] = mainWindow.getSize();
+    const bitmap = robot.screen.capture(x, y + 32, width, height - 64);
+    new Jimp(
+      { data: bitmap.image, width: bitmap.width, height: bitmap.height },
+      async (err, image) => {
+        hookImage = image;
+      }
+    );
   }
 });
 
@@ -255,7 +256,6 @@ ipcMain.handle("play", async (event, args) => {
   if (args == undefined) {
     await pool.exec("startMacro", [{ hooks: hookArray }]);
   } else {
-    console.log(args);
     for (var uuid of args) {
       const macro = data.list[uuid];
       mainWindow.setPosition(macro.window.x, macro.window.y);
@@ -267,25 +267,25 @@ ipcMain.handle("play", async (event, args) => {
         macro.window.width,
         macro.window.height - 64
       );
-      new Jimp(
-        { data: bitmap.image, width: bitmap.width, height: bitmap.height },
-        async (err, image) => {
-          await image.write(macro.path.actual);
-          const result = await compareSnapshotsPlugin({
-            base: macro.path.base,
-            actual: macro.path.actual,
-            diff: macro.path.diff,
-          });
-          console.log(result);
-          data.list[uuid].result["percentage"] = result.percentage;
-          fs.writeFileSync(dataPath, JSON.stringify(data));
-        }
-      );
+      await new Promise(
+        (resolve) =>
+          new Jimp(
+            { data: bitmap.image, width: bitmap.width, height: bitmap.height },
+            async (err, image) => {
+              await image.write(macro.path.actual);
+              const result = await compareSnapshotsPlugin({
+                base: macro.path.base,
+                actual: macro.path.actual,
+                diff: macro.path.diff,
+              });
 
-      mainWindow.setPosition(macro.window.x, macro.window.y);
-      mainWindow.setSize(macro.window.width, macro.window.height, false);
-      await pool.exec("startMacro", [{ hooks: [...macro.hooks] }]);
-      wait(1);
+              data.list[uuid].result["percentage"] = result.percentage;
+              fs.writeFileSync(dataPath, JSON.stringify(data));
+              resolve();
+            }
+          )
+      );
+      wait(0.5);
     }
   }
 

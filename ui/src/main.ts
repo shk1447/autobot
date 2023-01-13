@@ -122,8 +122,8 @@ let { handler: FooterViewModel } = registViewModel<IFooter>({
   async play(list: string[] | undefined) {
     this.setting = false;
     await ipcRenderer.invoke("play", list);
+    await ElectronViewModel.property.loadItems();
     if (list != undefined) {
-      await ElectronViewModel.property.loadItems();
       this.setting = true;
     }
   },
@@ -136,16 +136,17 @@ let { handler: FooterViewModel } = registViewModel<IFooter>({
     uuid: string;
     name: string;
   }) {
-    console.log(args);
     await ipcRenderer.invoke("save", args);
     ElectronViewModel.property.loadItems();
   },
 });
 
-FooterViewModel.on("setting", () => {
-  if (!FooterViewModel.state.setting) {
-    BodyViewModel.property.diffImage = null;
-  }
+FooterViewModel.on("setting", async () => {
+  await ElectronViewModel.property.loadItems();
+  BodyViewModel.property.diffImage = null;
+});
+ElectronViewModel.on("isCapture", () => {
+  BodyViewModel.property.diffImage = null;
 });
 
 ipcRenderer.invoke("click-through", { through: false });
