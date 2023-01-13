@@ -295,7 +295,9 @@ ipcMain.handle("play", async (event, args) => {
           new Jimp(
             { data: bitmap.image, width: bitmap.width, height: bitmap.height },
             async (err, image) => {
-              await image.write(macro.path.actual);
+              await image.write(
+                path.resolve(macro.path.directory, macro.path.actual)
+              );
               const result = await compareSnapshotsPlugin({
                 base: path.resolve(macro.path.directory, macro.path.base),
                 actual: path.resolve(macro.path.directory, macro.path.actual),
