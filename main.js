@@ -67,6 +67,9 @@ function createWindow() {
   // and load the index.html of the app.
   mainWindow.loadFile("./dist/index.html");
 
+  mainWindow.setAlwaysOnTop(true, "screen-saver");
+  mainWindow.setVisibleOnAllWorkspaces(true);
+
   // Open the DevTools.
   // mainWindow.webContents.openDevTools();
 }
