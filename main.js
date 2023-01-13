@@ -292,9 +292,9 @@ ipcMain.handle("play", async (event, args) => {
             async (err, image) => {
               await image.write(macro.path.actual);
               const result = await compareSnapshotsPlugin({
-                base: macro.path.base,
-                actual: macro.path.actual,
-                diff: macro.path.diff,
+                base: path.resolve(macro.path.directory, macro.path.base),
+                actual: path.resolve(macro.path.directory, macro.path.actual),
+                diff: path.resolve(macro.path.directory, macro.path.diff),
               });
 
               data.list[uuid].result["percentage"] = result.percentage;
