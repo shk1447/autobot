@@ -163,7 +163,10 @@ ipcMain.handle("capture", async (event, args) => {
     { data: bitmap.image, width: bitmap.width, height: bitmap.height },
     async (err, image) => {
       await image.write(
-        `./snapshots/${moment().format("YYYYMMDD_HHmmss")}.png`
+        path.resolve(
+          userDataPath,
+          `./snapshots/${moment().format("YYYYMMDD_HHmmss")}.png`
+        )
       );
     }
   );
