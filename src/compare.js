@@ -4,13 +4,7 @@ const path = require("path");
 const { PNG } = require("pngjs");
 const pixelmatch = require("pixelmatch");
 
-const {
-  adjustCanvas,
-  createFolder,
-  parseImage,
-  errorSerialize,
-  getValueOrDefault,
-} = require("./utils");
+const { adjustCanvas, parseImage, errorSerialize } = require("./utils");
 
 const compareSnapshotsPlugin = async (args) => {
   const snapshotBaseDirectory = path.resolve(process.cwd(), "snapshots");
@@ -24,16 +18,14 @@ const compareSnapshotsPlugin = async (args) => {
   const fileName = "test2333333";
 
   const options = {
-    actualImage: path.resolve(process.cwd(), `./actual.png`),
-    expectedImage: path.resolve(process.cwd(), `./base.png`),
-    diffImage: path.resolve(process.cwd(), `./diff.png`),
+    actualImage: args.actual,
+    expectedImage: args.base,
+    diffImage: args.diff,
   };
-  console.log(options);
 
   let mismatchedPixels = 0;
   let percentage = 0;
   try {
-    await createFolder(snapshotDiffDirectory, failSilently);
     const imgExpected = await parseImage(options.expectedImage);
     const imgActual = await parseImage(options.actualImage);
     const diff = new PNG({
@@ -58,13 +50,13 @@ const compareSnapshotsPlugin = async (args) => {
       diff.data,
       diff.width,
       diff.height,
-      { threshold: 0.1, alpha: 0.1, includeAA: false, diffMask: true }
+      { threshold: 0.1, alpha: 0.1, includeAA: true, diffMask: true }
     );
     percentage = (mismatchedPixels / diff.width / diff.height) ** 0.5;
 
     if (percentage > errorThreshold) {
       const specFolder = path.join(snapshotDiffDirectory, specDirectory);
-      await createFolder(specFolder, failSilently);
+
       diff.pack().pipe(fs.createWriteStream(options.diffImage));
       if (!allowVisualRegressionToFail)
         throw new Error(
@@ -72,7 +64,7 @@ const compareSnapshotsPlugin = async (args) => {
         );
     } else if (alwaysGenerateDiff) {
       const specFolder = path.join(snapshotDiffDirectory, specDirectory);
-      await createFolder(specFolder, failSilently);
+
       diff.pack().pipe(fs.createWriteStream(options.diffImage));
     }
   } catch (error) {

@@ -25,23 +25,38 @@ interface IElectron {
   init: () => void;
   isCapture: boolean;
   items: Item[];
+  current: { save: boolean };
   toggleCapture: () => void;
   through: (value: boolean) => void;
   loadItems: () => void;
+  getResultImage: (item: any) => void;
+}
+
+interface IBody {
+  init: () => void;
+  diffImage: any;
 }
 
 interface IFooter {
   init: () => void;
   setting: boolean;
   snapshot: () => void;
-  play: (idx: number | undefined) => void;
+  play: (list: string[] | undefined) => void;
   save: (args: {
     type: "new" | "update" | "remove";
-    idx: number;
+    uuid: string;
     name: string;
   }) => void;
   toggleSetting: (val: boolean) => void;
 }
+
+const { handler: BodyViewModel } = registViewModel<IBody>({
+  init() {
+    BodyViewModel.property = this;
+    BodyViewModel.reset();
+  },
+  diffImage: null,
+});
 
 const { handler: HeaderViewModel } = registViewModel<IHeader>({
   init() {
@@ -65,9 +80,11 @@ const { handler: ElectronViewModel } = registViewModel<IElectron>({
   },
   isCapture: false,
   items: [],
+  current: { save: false },
   async loadItems() {
     const result = await ipcRenderer.invoke("load");
     this.items = result.list;
+    this.current = result.current;
   },
   toggleCapture() {
     this.isCapture = !this.isCapture;
@@ -76,12 +93,21 @@ const { handler: ElectronViewModel } = registViewModel<IElectron>({
       ipcRenderer.invoke("record", true);
     } else {
       ipcRenderer.invoke("record", false);
+      this.loadItems();
     }
   },
   async through(value: boolean) {
     if (ElectronViewModel.property.isCapture) {
       await ipcRenderer.invoke("click-through", { through: value });
     }
+  },
+  async getResultImage(item: any) {
+    FooterViewModel.property.setting = false;
+    const result = await ipcRenderer.invoke(
+      "getResultImage",
+      JSON.parse(JSON.stringify(item))
+    );
+    BodyViewModel.property.diffImage = result;
   },
 });
 
@@ -93,10 +119,13 @@ let { handler: FooterViewModel } = registViewModel<IFooter>({
   snapshot: async () => {
     await ipcRenderer.invoke("capture");
   },
-  async play(idx: number | undefined) {
+  async play(list: string[] | undefined) {
     this.setting = false;
-    await ipcRenderer.invoke("play", idx);
-    if (idx != undefined) this.setting = true;
+    await ipcRenderer.invoke("play", list);
+    if (list != undefined) {
+      await ElectronViewModel.property.loadItems();
+      this.setting = true;
+    }
   },
   setting: true,
   toggleSetting(val: boolean) {
@@ -104,7 +133,7 @@ let { handler: FooterViewModel } = registViewModel<IFooter>({
   },
   async save(args: {
     type: "new" | "update" | "remove";
-    idx: number;
+    uuid: string;
     name: string;
   }) {
     console.log(args);
@@ -113,11 +142,19 @@ let { handler: FooterViewModel } = registViewModel<IFooter>({
   },
 });
 
+FooterViewModel.on("setting", () => {
+  if (!FooterViewModel.state.setting) {
+    BodyViewModel.property.diffImage = null;
+  }
+});
+
 ipcRenderer.invoke("click-through", { through: false });
 
 Alpine.store("electron", ElectronViewModel.state);
 
 Alpine.store("header", HeaderViewModel.state);
+
+Alpine.store("body", BodyViewModel.state);
 
 Alpine.store("footer", FooterViewModel.state);
 

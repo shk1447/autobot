@@ -81,6 +81,24 @@ const errorSerialize = (error) =>
 
 const getValueOrDefault = (value, defaultValue) => value || defaultValue;
 
+const wait = (sec) => {
+  const start = Date.now();
+  let now = start;
+
+  while (now - start < sec * 1000) {
+    now = Date.now();
+  }
+};
+
+const pad = (number, length) => {
+  var str = "" + number;
+  while (str.length < length) {
+    str = "0" + str;
+  }
+
+  return str;
+};
+
 module.exports = {
   adjustCanvas,
   createFolder,
@@ -88,4 +106,6 @@ module.exports = {
   parseImage,
   errorSerialize,
   getValueOrDefault,
+  wait,
+  pad,
 };

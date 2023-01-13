@@ -8,6 +8,12 @@ const fs = require("fs-extra");
 const ioHook = require("iohook");
 const robot = require("@jitsi/robotjs");
 const { compareSnapshotsPlugin } = require("./src/compare");
+const workerpool = require("workerpool");
+const { wait, pad } = require("./src/utils");
+const { v4: uuidv4 } = require("uuid");
+const moment = require("moment");
+
+const pool = workerpool.pool(process.cwd() + "/src/macro.worker.js");
 
 let mainWindow;
 let currentThrough = false;
@@ -90,21 +96,6 @@ ipcMain.handle("click-through", async (event, args) => {
   }
 });
 
-ipcMain.handle("capture", async (event, args) => {
-  const [x, y] = mainWindow.getPosition();
-  const [width, height] = mainWindow.getSize();
-
-  const bitmap = robot.screen.capture(x, y + 32, width, height - 64);
-  new Jimp(
-    { data: bitmap.image, width: bitmap.width, height: bitmap.height },
-    async (err, image) => {
-      await image.write("./actual.png");
-      const result = await compareSnapshotsPlugin();
-      console.log(result);
-    }
-  );
-});
-
 let hookArray = [];
 ioHook.useRawcode(false);
 
@@ -133,30 +124,53 @@ ioHook.on("keydown", (event) => {
 });
 
 ioHook.on("keyup", (event) => {
-  hookArray.push(event);
+  console.log(event);
 });
 
 robot.setMouseDelay(0);
 
-const wait = (sec) => {
-  const start = Date.now();
-  let now = start;
-
-  while (now - start < sec * 1000) {
-    now = Date.now();
-  }
-};
-
 const dataPath = path.resolve(process.cwd(), "./data.json");
 if (!fs.existsSync(dataPath)) {
-  fs.writeJSONSync(dataPath, { list: [] });
+  fs.writeJSONSync(dataPath, { list: {} });
 }
 const data = JSON.parse(fs.readFileSync(dataPath));
-console.log(data);
+
+ipcMain.handle("capture", async (event, args) => {
+  const [x, y] = mainWindow.getPosition();
+  const [width, height] = mainWindow.getSize();
+
+  const bitmap = robot.screen.capture(x, y + 32, width, height - 64);
+
+  new Jimp(
+    { data: bitmap.image, width: bitmap.width, height: bitmap.height },
+    async (err, image) => {
+      console.log(image);
+      await image.write(
+        `./snapshots/${moment().format("YYYYMMDD_HHmmss")}.png`
+      );
+    }
+  );
+});
 
 ipcMain.handle("load", async (event, args) => {
   console.log("load!!!");
-  return data;
+  const ret_list = {};
+  for (var key of Object.keys(data.list)) {
+    ret_list[key] = {
+      uuid: data.list[key].uuid,
+      name: data.list[key].name,
+      cron: data.list[key].cron,
+      path: data.list[key].path,
+      result: data.list[key].result,
+    };
+  }
+  console.log(hookArray.length);
+  return {
+    list: ret_list,
+    current: {
+      save: hookArray.length > 0 ? false : true,
+    },
+  };
 });
 
 ipcMain.handle("save", async (event, args) => {
@@ -165,9 +179,11 @@ ipcMain.handle("save", async (event, args) => {
   const [width, height] = mainWindow.getSize();
   switch (args.type) {
     case "new": {
-      data.list.push({
-        id: data.list.length,
-        name: "macro-" + data.list.length,
+      const uuid = uuidv4();
+      const bitmap = robot.screen.capture(x, y + 32, width, height - 64);
+      const macro = {
+        uuid: uuid,
+        name: "macro-" + Object.keys(data.list).length,
         hooks: hookArray,
         cron: ["?", "?", "*", "*", "*", "*"],
         window: {
@@ -176,16 +192,38 @@ ipcMain.handle("save", async (event, args) => {
           width: width,
           height: height,
         },
-      });
+        path: {
+          directory: process.cwd(),
+          base: `./snapshots/${uuid}/base.png`,
+          actual: `./snapshots/${uuid}/actual.png`,
+          diff: `./snapshots/${uuid}/diff.png`,
+        },
+        result: {},
+      };
+      new Jimp(
+        { data: bitmap.image, width: bitmap.width, height: bitmap.height },
+        async (err, image) => {
+          await image.write(macro.path.base);
+        }
+      );
+      data.list[uuid] = macro;
       break;
     }
     case "update": {
-      data.list[args.idx].name = args.name;
+      data.list[args.uuid].name = args.name;
       break;
     }
     case "remove": {
-      if (args.idx != undefined) data.list.splice(args.idx, 1);
-      else data.list = [];
+      console.log(args);
+      if (args.uuid != undefined) {
+        fs.removeSync(
+          path.resolve(process.cwd(), data.list[args.uuid].path.directory)
+        );
+        delete data.list[args.uuid];
+      } else {
+        fs.removeSync(path.resolve(process.cwd(), "./snapshots"));
+        data.list = {};
+      }
       break;
     }
   }
@@ -204,96 +242,49 @@ ipcMain.handle("record", async (event, args) => {
   }
 });
 
+ipcMain.handle("getResultImage", async (event, args) => {
+  const readFile = fs.readFileSync(path.resolve(args.directory, args.diff));
+  let encode = Buffer.from(readFile).toString("base64");
+
+  return encode;
+});
+
 ipcMain.handle("play", async (event, args) => {
   mainWindow.setIgnoreMouseEvents(true, { forward: true });
 
-  const executeHooks = async (hooks) => {
-    const result = await new Promise((resolve) => {
-      const clicks = hooks.filter((d) => d.type == "mousedown");
-      hooks.splice(hooks.indexOf(clicks[clicks.length - 1]), 3);
-      for (var hook of hooks) {
-        switch (hook.type) {
-          case "mousemove": {
-            wait(0.0005);
-            robot.moveMouse(hook.x, hook.y);
-            break;
-          }
-          case "mousewheel": {
-            wait(0.1);
-            robot.scrollMouse(0, -hook.rotation * hook.amount * 40);
-            break;
-          }
-          case "mouseclick": {
-            // wait(0.4);
-            // const clickType =
-            //   hook.button == 1 ? "left" : hook.button == 2 ? "right" : "middle";
-            // robot.mouseClick(clickType);
-            break;
-          }
-          case "mousedown": {
-            wait(0.5);
-            const clickType =
-              hook.button == 1 ? "left" : hook.button == 2 ? "right" : "middle";
-            robot.mouseToggle("down", clickType);
-
-            break;
-          }
-          case "mouseup": {
-            wait(0.5);
-            const clickType =
-              hook.button == 1 ? "left" : hook.button == 2 ? "right" : "middle";
-            robot.mouseToggle("up", clickType);
-            break;
-          }
-          case "mousedrag": {
-            wait(0.0005);
-            robot.dragMouse(hook.x, hook.y);
-            break;
-          }
-          case "keyup": {
-            wait(0.0005);
-            if (hook.shiftKey || hook.altKey || hook.ctrlKey || hook.metaKey) {
-              console.log("short cut!!! gogo");
-            } else {
-              const text = String.fromCharCode(hook.rawcode);
-              robot.typeString(text.toLowerCase());
-            }
-            break;
-          }
-          case "keydown": {
-            break;
-          }
-        }
-      }
-
-      resolve(true);
-    });
-
-    return result;
-  };
-
   if (args == undefined) {
-    executeHooks(hookArray);
-  } else if (args >= 0) {
-    const macro = data.list[args];
-    mainWindow.setPosition(macro.window.x, macro.window.y);
-    mainWindow.setSize(macro.window.width, macro.window.height, false);
-    await new Promise((resolve) =>
-      setTimeout(async () => {
-        executeHooks([...macro.hooks]);
-        resolve();
-      }, 500)
-    );
+    await pool.exec("startMacro", [{ hooks: hookArray }]);
   } else {
-    for (var macro of data.list) {
+    console.log(args);
+    for (var uuid of args) {
+      const macro = data.list[uuid];
       mainWindow.setPosition(macro.window.x, macro.window.y);
       mainWindow.setSize(macro.window.width, macro.window.height, false);
-      await new Promise((resolve) =>
-        setTimeout(async () => {
-          await executeHooks([...macro.hooks]);
-          resolve();
-        }, 500)
+      await pool.exec("startMacro", [{ hooks: [...macro.hooks] }]);
+      const bitmap = robot.screen.capture(
+        macro.window.x,
+        macro.window.y + 32,
+        macro.window.width,
+        macro.window.height - 64
       );
+      new Jimp(
+        { data: bitmap.image, width: bitmap.width, height: bitmap.height },
+        async (err, image) => {
+          await image.write(macro.path.actual);
+          const result = await compareSnapshotsPlugin({
+            base: macro.path.base,
+            actual: macro.path.actual,
+            diff: macro.path.diff,
+          });
+          console.log(result);
+          data.list[uuid].result["percentage"] = result.percentage;
+          fs.writeFileSync(dataPath, JSON.stringify(data));
+        }
+      );
+
+      mainWindow.setPosition(macro.window.x, macro.window.y);
+      mainWindow.setSize(macro.window.width, macro.window.height, false);
+      await pool.exec("startMacro", [{ hooks: [...macro.hooks] }]);
       wait(1);
     }
   }

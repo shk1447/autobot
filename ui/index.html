@@ -48,7 +48,7 @@
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
-      <div x-data style="flex: 1"></div>
+      <div x-data :style="$store.body.diffImage ? `flex:1; background:url('data:image/png;base64,${$store.body.diffImage}')`:'flex: 1;'"></div>
 
       <div
         x-data
@@ -86,7 +86,7 @@
         <button class="btn" @click="$store.footer.snapshot();">
           <i class="fa-solid fa-camera"></i> SNAPSHOT
         </button>
-        <button class="btn" @click="$store.footer.save({type:'new'});">
+        <button class="btn" @click="$store.footer.save({type:'new'});" :disabled="$store.electron.current.save">
           <i class="fa-regular fa-floppy-disk"></i> SAVE
         </button>
         <button class="btn" @click="$store.footer.toggleSetting()">
@@ -106,15 +106,16 @@
         overflow: hidden;
       "
     >
-      <div style="grid-template-rows:28px repeat(auto-fill, minmax(28px, 28px)); grid-template-columns: 36px auto 128px; display: grid; overflow:auto; height:100%; contain:strict; content-visibility: auto;">
+      <div style="grid-template-rows:28px repeat(auto-fill, minmax(28px, 28px)); grid-template-columns: 36px auto 80px 128px; display: grid; overflow:auto; height:100%; contain:strict; content-visibility: auto;">
         <div style="display: contents;">
           <div style="position:sticky; top:0; background: #2b314e; height:100%;display: flex; align-items: center; justify-content: center; padding:4px">No.</div>
           <div style="position:sticky; top:0; background: #2b314e; height:100%;display: flex; align-items: center; justify-content: center; padding:4px">Name</div>
+          <div style="position:sticky; top:0; background: #2b314e; height:100%;display: flex; align-items: center; justify-content: center; padding:4px">Result</div>
           <div style="position:sticky; top:0; background: #2b314e; height:100%;display: flex; align-items: center; justify-content: center; padding:4px">
               <button
                 type="button"
                 class="btn"
-                @click="$store.footer.play(-1)"
+                @click="$store.footer.play(Object.keys($store.electron.items))"
                 :disabled="$store.electron.isCapture"
               >
                 <i class="fa-solid fa-play"></i>
@@ -138,17 +139,25 @@
               </button>
           </div>
         </div>
-        <template x-for="(item,idx) in $store.electron.items">
+        <template x-for="(item,idx) in Object.values($store.electron.items)">
           <div style="display: contents;">
             <div style="height:24px;display: flex; align-items: center; justify-content: center; padding:4px" x-text="idx+1"></div>
             <div style="height:24px;display: flex; align-items: center; padding:4px">
-              <input type="text" style="width:100%; border: none; background: transparent; color:white;" x-model="item.name" @blur="$store.footer.save({type:'update',idx:idx, name:item.name})">
+              <input type="text" style="width:100%; border: none; background: transparent; color:white;" x-model="item.name" @blur="$store.footer.save({type:'update',uuid:item.uuid, name:item.name})">
+            </div>
+            <div style="height:24px;display: flex; align-items: center; justify-content: center; padding:4px">
+              <div style="display: flex; gap:4px; align-items: center;;">
+                <span x-text="item.result.percentage != undefined ? ((Math.round(item.result.percentage*10000)/100)+'%') : 'No Result'"></span>
+                <button x-show="item.result.percentage != undefined ? true : false" type="button" class="btn" @click="$store.electron.getResultImage(item.path)">
+                  <i class="fa-regular fa-image"></i>
+                </button>
+              </div>
             </div>
             <div style="height:24px;display: flex; align-items: center; justify-content: center; padding:4px">
               <button
                 type="button"
                 class="btn"
-                @click="$store.footer.play(idx)"
+                @click="$store.footer.play([item.uuid])"
                 :disabled="$store.electron.isCapture"
               >
                 <i class="fa-solid fa-play"></i>
@@ -166,7 +175,7 @@
               <button
                 type="button"
                 class="btn"
-                @click="$store.footer.save({type:'remove',idx:idx})"
+                @click="$store.footer.save({type:'remove',uuid:item.uuid})"
                 :disabled="$store.electron.isCapture"
               >
                 <i class="fa-solid fa-trash-can"></i>
@@ -175,19 +184,7 @@
           </div>
         </template>
       </ul>
-      <!-- <a href="#" class="w3-bar-item w3-button">Link 1</a>
-      <a href="#" class="w3-bar-item w3-button">Link 2</a>
-      <div class="w3-dropdown-hover">
-        <button class="w3-button">
-          Dropdown
-          <i class="fa fa-caret-down"></i>
-        </button>
-        <div class="w3-dropdown-content w3-bar-block">
-          <a href="#" class="w3-bar-item w3-button">Link</a>
-          <a href="#" class="w3-bar-item w3-button">Link</a>
-        </div>
-      </div>
-      <a href="#" class="w3-bar-item w3-button">Link 3</a> -->
+      
     </div>
     <script type="module" src="/src/main.ts"></script>
   </body>

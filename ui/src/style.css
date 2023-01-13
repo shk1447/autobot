@@ -102,7 +102,7 @@ input:checked + .slider:before {
 }
 
 .open-panel {
-  width: 40%;
+  width: 50%;
   animation-name: open-panel;
   animation-duration: 0.3s;
 }
@@ -130,13 +130,13 @@ input:checked + .slider:before {
     width: 0%;
   }
   100% {
-    width: 40%;
+    width: 50%;
   }
 }
 
 @keyframes close-panel {
   0% {
-    width: 40%;
+    width: 50%;
   }
   100% {
     width: 0%;
