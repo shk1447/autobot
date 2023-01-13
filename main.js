@@ -217,7 +217,9 @@ ipcMain.handle("save", async (event, args) => {
         },
         result: {},
       };
-      await hookImage.write(macro.path.base);
+      await hookImage.write(
+        path.resolve(macro.path.directory, macro.path.base)
+      );
       data.list[uuid] = macro;
       break;
     }
