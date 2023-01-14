@@ -4,7 +4,7 @@ import renderer from "vite-plugin-electron-renderer";
 export default defineConfig({
   base: "./",
   build: {
-    outDir: "../dist",
+    outDir: "../app",
     rollupOptions: {
       output: {
         entryFileNames: `[name].js`,

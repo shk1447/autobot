@@ -107,3 +107,4 @@ dist
 snapshots/
 data.json
 packages/
+app/

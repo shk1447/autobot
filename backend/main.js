@@ -4,7 +4,7 @@ const { app, BrowserWindow, ipcMain } = require("electron");
 const _ = require("lodash");
 const Jimp = require("jimp");
 const path = require("path");
-const fs = require("fs-extra");
+const fs = require("fs");
 const ioHook = require("iohook");
 const robot = require("@jitsi/robotjs");
 const { compareSnapshotsPlugin } = require("./src/compare");
@@ -12,6 +12,8 @@ const workerpool = require("workerpool");
 const { wait, createFolder } = require("./src/utils");
 const { v4: uuidv4 } = require("uuid");
 const moment = require("moment");
+
+console.log(app.isPackaged);
 
 const unhandled = require("electron-unhandled");
 
@@ -28,7 +30,7 @@ unhandled({
   },
 });
 
-const userDataPath = path.resolve(app.getPath("userData"), "./AutoCapture");
+const userDataPath = path.resolve(app.getPath("userData"));
 createFolder(userDataPath, true);
 
 const pool = workerpool.pool(
@@ -65,7 +67,7 @@ function createWindow() {
     alwaysOnTop: true,
   });
   // and load the index.html of the app.
-  mainWindow.loadFile("./dist/index.html");
+  mainWindow.loadFile(path.resolve(app.getAppPath(), "../app/index.html"));
 
   mainWindow.setAlwaysOnTop(true, "screen-saver");
   mainWindow.setVisibleOnAllWorkspaces(true);
@@ -152,7 +154,7 @@ robot.setMouseDelay(0);
 
 const dataPath = path.resolve(userDataPath, "./data.json");
 if (!fs.existsSync(dataPath)) {
-  fs.writeJSONSync(dataPath, { list: {} });
+  fs.writeFileSync(dataPath, JSON.stringify({ list: {} }));
 }
 const data = JSON.parse(fs.readFileSync(dataPath));
 
@@ -232,12 +234,12 @@ ipcMain.handle("save", async (event, args) => {
     }
     case "remove": {
       if (args.uuid != undefined) {
-        fs.removeSync(
+        fs.unlinkSync(
           path.resolve(userDataPath, data.list[args.uuid].path.directory)
         );
         delete data.list[args.uuid];
       } else {
-        fs.removeSync(path.resolve(userDataPath, "./snapshots"));
+        fs.unlinkSync(path.resolve(userDataPath, "./snapshots"));
         data.list = {};
       }
       break;
