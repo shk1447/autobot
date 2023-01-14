@@ -1,5 +1,6 @@
 const robot = require("@jitsi/robotjs");
 const workerpool = require("workerpool");
+const keycode = require("keycode");
 const { wait } = require("./utils");
 
 const startMacro = (args) => {
@@ -46,16 +47,43 @@ const startMacro = (args) => {
         break;
       }
       case "keyup": {
-        wait(0.0002);
-        if (hook.shiftKey || hook.altKey || hook.ctrlKey || hook.metaKey) {
-          console.log("short cut!!! gogo");
-        } else {
-          const text = String.fromCharCode(hook.rawcode);
-          robot.typeString(text.toLowerCase());
-        }
+        wait(0.05);
+
+        const modifier = [];
+
+        if (hook.shiftKey) modifier.push("shift");
+        if (hook.altKey) modifier.push("alt");
+        if (hook.ctrlKey) modifier.push("control");
+        if (hook.metaKey) modifier.push("command");
+
+        const key = keycode(hook.rawcode);
+        // console.log(key);
+        robot.keyToggle(key, "up", modifier);
+
+        // if (hook.shiftKey || hook.altKey || hook.ctrlKey || hook.metaKey) {
+        //   console.log("short cut!!! gogo");
+        //   //robot.keyTap
+        // } else {
+        //   const text = String.fromCharCode(hook.rawcode);
+        //   robot.typeString(text.toLowerCase());
+        // }
         break;
       }
       case "keydown": {
+        wait(0.05);
+
+        const modifier = [];
+
+        if (hook.shiftKey) modifier.push("shift");
+        if (hook.altKey) modifier.push("alt");
+        if (hook.ctrlKey) modifier.push("control");
+        if (hook.metaKey) modifier.push("command");
+
+        let key = keycode(hook.rawcode);
+        console.log(key);
+        if (key.includes("command")) key = "command";
+
+        robot.keyToggle(key, "down", modifier);
         break;
       }
     }
@@ -65,3 +93,21 @@ const startMacro = (args) => {
 workerpool.worker({
   startMacro: startMacro,
 });
+
+/*
+
+160 shift
+161 right shift
+
+162 ctrl
+164 alt
+
+21 한영키 (right alt)
+
+
+25 한자 (right control)
+
+
+44 print screen
+
+*/

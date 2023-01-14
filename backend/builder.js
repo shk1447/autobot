@@ -21,6 +21,7 @@ _package.dependencies = {
   "@jitsi/robotjs": "^0.6.11",
   iohook: "^0.9.3",
   jimp: "^0.16.2",
+  workerpool: "^6.3.1",
 };
 
 var target = "app";
@@ -44,6 +45,7 @@ var config = {
     "@jitsi/robotjs": "commonjs @jitsi/robotjs",
     iohook: "commonjs iohook",
     jimp: "commonjs jimp",
+    workerpool: "commonjs workerpool",
   },
   plugins: [
     new CopyWebpackPlugin({

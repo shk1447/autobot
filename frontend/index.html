@@ -86,7 +86,7 @@
         <button class="btn" @click="$store.footer.snapshot();">
           <i class="fa-solid fa-camera"></i> SNAPSHOT
         </button>
-        <button class="btn" @click="$store.footer.save({type:'new'});" :disabled="$store.electron.current.save">
+        <button class="btn" @click="$store.footer.save({type:'new'});" :disabled="$store.electron.current.save || $store.electron.isCapture">
           <i class="fa-regular fa-floppy-disk"></i> SAVE
         </button>
         <button class="btn" @click="$store.footer.toggleSetting()">

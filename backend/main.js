@@ -4,7 +4,7 @@ const { app, BrowserWindow, ipcMain } = require("electron");
 const _ = require("lodash");
 const Jimp = require("jimp");
 const path = require("path");
-const fs = require("fs");
+const fs = require("fs-extra");
 const ioHook = require("iohook");
 const robot = require("@jitsi/robotjs");
 const { compareSnapshotsPlugin } = require("./src/compare");
@@ -144,10 +144,11 @@ ioHook.on("mouseup", (event) => {
 });
 ioHook.on("keydown", (event) => {
   // NOTE: 나중에 작업하자...
+  hookArray.push(event);
 });
-
 ioHook.on("keyup", (event) => {
   // NOTE: 나중에 작업하자...
+  hookArray.push(event);
 });
 
 robot.setMouseDelay(0);
@@ -167,6 +168,7 @@ ipcMain.handle("capture", async (event, args) => {
   new Jimp(
     { data: bitmap.image, width: bitmap.width, height: bitmap.height },
     async (err, image) => {
+      console.log(userDataPath);
       await image.write(
         path.resolve(
           userDataPath,
@@ -233,13 +235,12 @@ ipcMain.handle("save", async (event, args) => {
       break;
     }
     case "remove": {
+      console.log(args);
       if (args.uuid != undefined) {
-        fs.unlinkSync(
-          path.resolve(userDataPath, data.list[args.uuid].path.directory)
-        );
+        fs.removeSync(path.resolve(userDataPath, `./snapshots/${args.uuid}`));
         delete data.list[args.uuid];
       } else {
-        fs.unlinkSync(path.resolve(userDataPath, "./snapshots"));
+        fs.removeSync(path.resolve(userDataPath, "./snapshots"));
         data.list = {};
       }
       break;
@@ -281,42 +282,50 @@ ipcMain.handle("getResultImage", async (event, args) => {
 ipcMain.handle("play", async (event, args) => {
   mainWindow.setIgnoreMouseEvents(true, { forward: true });
 
-  if (args == undefined) {
-    await pool.exec("startMacro", [{ hooks: hookArray }]);
-  } else {
-    for (var uuid of args) {
-      const macro = data.list[uuid];
-      mainWindow.setPosition(macro.window.x, macro.window.y);
-      mainWindow.setSize(macro.window.width, macro.window.height, false);
-      await pool.exec("startMacro", [{ hooks: [...macro.hooks] }]);
-      const bitmap = robot.screen.capture(
-        macro.window.x,
-        macro.window.y + 32,
-        macro.window.width,
-        macro.window.height - 64
-      );
-      await new Promise(
-        (resolve) =>
-          new Jimp(
-            { data: bitmap.image, width: bitmap.width, height: bitmap.height },
-            async (err, image) => {
-              await image.write(
-                path.resolve(macro.path.directory, macro.path.actual)
-              );
-              const result = await compareSnapshotsPlugin({
-                base: path.resolve(macro.path.directory, macro.path.base),
-                actual: path.resolve(macro.path.directory, macro.path.actual),
-                diff: path.resolve(macro.path.directory, macro.path.diff),
-              });
+  try {
+    if (args == undefined) {
+      await pool.exec("startMacro", [{ hooks: hookArray }]);
+    } else {
+      for (var uuid of args) {
+        const macro = data.list[uuid];
+        mainWindow.setPosition(macro.window.x, macro.window.y);
+        mainWindow.setSize(macro.window.width, macro.window.height, false);
+        await pool.exec("startMacro", [{ hooks: [...macro.hooks] }]);
+        const bitmap = robot.screen.capture(
+          macro.window.x,
+          macro.window.y + 32,
+          macro.window.width,
+          macro.window.height - 64
+        );
+        await new Promise(
+          (resolve) =>
+            new Jimp(
+              {
+                data: bitmap.image,
+                width: bitmap.width,
+                height: bitmap.height,
+              },
+              async (err, image) => {
+                await image.write(
+                  path.resolve(macro.path.directory, macro.path.actual)
+                );
+                const result = await compareSnapshotsPlugin({
+                  base: path.resolve(macro.path.directory, macro.path.base),
+                  actual: path.resolve(macro.path.directory, macro.path.actual),
+                  diff: path.resolve(macro.path.directory, macro.path.diff),
+                });
 
-              data.list[uuid].result["percentage"] = result.percentage;
-              fs.writeFileSync(dataPath, JSON.stringify(data));
-              resolve();
-            }
-          )
-      );
-      wait(0.5);
+                data.list[uuid].result["percentage"] = result.percentage;
+                fs.writeFileSync(dataPath, JSON.stringify(data));
+                resolve();
+              }
+            )
+        );
+        wait(0.5);
+      }
     }
+  } catch (error) {
+    console.log(error);
   }
 
   mainWindow.setIgnoreMouseEvents(false);
