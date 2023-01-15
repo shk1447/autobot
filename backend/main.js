@@ -138,7 +138,6 @@ ioHook.on("mousedown", (event) => {
 ioHook.on("mousewheel", (event) => {
   hookArray.push(event);
 });
-
 ioHook.on("mouseup", (event) => {
   hookArray.push(event);
 });

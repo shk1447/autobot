@@ -3,6 +3,19 @@ const workerpool = require("workerpool");
 const keycode = require("keycode");
 const { wait } = require("./utils");
 
+const missingKey = {
+  160: "shift",
+  161: "shift",
+  162: "control",
+  164: "alt",
+  // 한영전환 기능 필요...
+  21: "right alt",
+  25: "right control",
+  44: "print",
+  91: "command",
+  93: "right command",
+};
+
 const startMacro = (args) => {
   const { hooks } = args;
   const clicks = hooks.filter((d) => d.type == "mousedown");
@@ -56,17 +69,19 @@ const startMacro = (args) => {
         if (hook.ctrlKey) modifier.push("control");
         if (hook.metaKey) modifier.push("command");
 
-        const key = keycode(hook.rawcode);
-        // console.log(key);
-        robot.keyToggle(key, "up", modifier);
+        let key;
+        if (missingKey[hook.rawcode]) {
+          key = missingKey[hook.rawcode];
+        } else {
+          key = keycode(hook.rawcode);
+        }
 
-        // if (hook.shiftKey || hook.altKey || hook.ctrlKey || hook.metaKey) {
-        //   console.log("short cut!!! gogo");
-        //   //robot.keyTap
-        // } else {
-        //   const text = String.fromCharCode(hook.rawcode);
-        //   robot.typeString(text.toLowerCase());
-        // }
+        console.log(key);
+        try {
+          robot.keyToggle(key, "up", modifier);
+        } catch (error) {
+          console.warn(`missing key ${key} : ${hook.rawcode}`);
+        }
         break;
       }
       case "keydown": {
@@ -79,11 +94,19 @@ const startMacro = (args) => {
         if (hook.ctrlKey) modifier.push("control");
         if (hook.metaKey) modifier.push("command");
 
-        let key = keycode(hook.rawcode);
-        console.log(key);
-        if (key.includes("command")) key = "command";
+        let key;
+        if (missingKey[hook.rawcode]) {
+          key = missingKey[hook.rawcode];
+        } else {
+          key = keycode(hook.rawcode);
+        }
 
-        robot.keyToggle(key, "down", modifier);
+        console.log(key);
+        try {
+          robot.keyToggle(key, "down", modifier);
+        } catch (error) {
+          console.warn(`missing key ${key} : ${hook.rawcode}`);
+        }
         break;
       }
     }
