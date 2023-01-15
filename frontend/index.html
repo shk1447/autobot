@@ -40,9 +40,13 @@
             height: 100%;
             background: transparent;
           "
+          
         ></div>
         <button class="btn" @click="$store.header.minimize()">
           <i class="fa-solid fa-window-minimize"></i>
+        </button>
+        <button class="btn" @click="$store.header.maximize()">
+          <i class="fa-solid fa-window-maximize"></i>
         </button>
         <button class="btn" @click="$store.header.exit()">
           <i class="fa-solid fa-xmark"></i>

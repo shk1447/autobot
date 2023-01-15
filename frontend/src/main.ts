@@ -13,6 +13,7 @@ interface IHeader {
   title: string;
   exit: () => void;
   minimize: () => void;
+  maximize: () => void;
 }
 
 type Item = {
@@ -69,6 +70,9 @@ const { handler: HeaderViewModel } = registViewModel<IHeader>({
   },
   minimize: async () => {
     await ipcRenderer.invoke("minimize");
+  },
+  maximize: async () => {
+    await ipcRenderer.invoke("maximize");
   },
 });
 

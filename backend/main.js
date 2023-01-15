@@ -73,7 +73,7 @@ function createWindow() {
   mainWindow.setVisibleOnAllWorkspaces(true);
 
   // Open the DevTools.
-  // mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools();
 }
 
 // This method will be called when Electron has finished
@@ -106,6 +106,26 @@ ipcMain.handle("exit", async (event, args) => {
 
 ipcMain.handle("minimize", async (event, args) => {
   mainWindow.minimize();
+  return true;
+});
+
+let bounding = undefined;
+ipcMain.handle("maximize", async (event, args) => {
+  if (!bounding) {
+    const [x, y] = mainWindow.getPosition();
+    const [width, height] = mainWindow.getSize();
+    bounding = {
+      x,
+      y,
+      width,
+      height,
+    };
+    mainWindow.maximize();
+  } else {
+    mainWindow.setPosition(bounding.x, bounding.y);
+    mainWindow.setSize(bounding.width, bounding.height);
+    bounding = undefined;
+  }
   return true;
 });
 
