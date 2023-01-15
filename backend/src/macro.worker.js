@@ -3,6 +3,19 @@ const workerpool = require("workerpool");
 const keycode = require("keycode");
 const { wait } = require("./utils");
 
+/*
+
+160 shift
+161 right shift
+162 ctrl
+164 alt
+
+21 한영키 (right alt) 
+25 한자 (right control)
+44 print screen
+
+*/
+
 const missingKey = {
   160: "shift",
   161: "shift",
@@ -116,21 +129,3 @@ const startMacro = (args) => {
 workerpool.worker({
   startMacro: startMacro,
 });
-
-/*
-
-160 shift
-161 right shift
-
-162 ctrl
-164 alt
-
-21 한영키 (right alt)
-
-
-25 한자 (right control)
-
-
-44 print screen
-
-*/
