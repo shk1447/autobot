@@ -258,7 +258,12 @@ ipcMain.handle("settingWindow", async (event, args) => {
     alwaysOnTop: true,
   });
   // and load the index.html of the app.
-  settingWindow.loadFile(path.resolve(app.getAppPath(), "../app/setting.html"));
+  settingWindow.loadFile(
+    path.resolve(app.getAppPath(), "../app/setting.html"),
+    { query: { test: 111 } }
+  );
+
+  settingWindow.webContents.openDevTools();
 
   settingWindow.once("ready-to-show", () => {
     settingWindow.show();

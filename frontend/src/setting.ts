@@ -7,4 +7,6 @@ import "@fortawesome/fontawesome-free/js/all.js";
 
 window.Alpine = Alpine;
 
+console.log(location);
+
 Alpine.start();

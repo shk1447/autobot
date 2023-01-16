@@ -116,7 +116,7 @@ const { handler: ElectronViewModel } = registViewModel<IElectron>({
     BodyViewModel.property.diffImage = result;
   },
   async showSettingWindow() {
-    // await ipcRenderer.invoke("settingWindow", { query: "test" });
+    await ipcRenderer.invoke("settingWindow", { query: "test" });
   },
 });
 
