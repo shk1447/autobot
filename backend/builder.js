@@ -22,6 +22,7 @@ _package.dependencies = {
   iohook: "^0.9.3",
   jimp: "^0.16.2",
   workerpool: "^6.3.1",
+  keycode: "^2.2.1",
 };
 
 var target = "app";
@@ -46,6 +47,7 @@ var config = {
     iohook: "commonjs iohook",
     jimp: "commonjs jimp",
     workerpool: "commonjs workerpool",
+    keycode: "commonjs keycode",
   },
   plugins: [
     new CopyWebpackPlugin({

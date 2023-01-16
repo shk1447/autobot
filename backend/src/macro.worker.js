@@ -53,7 +53,7 @@ const startMacro = (args) => {
         break;
       }
       case "mousedown": {
-        wait(0.4);
+        wait(0.1);
         const clickType =
           hook.button == 1 ? "left" : hook.button == 2 ? "right" : "middle";
         robot.mouseToggle("down", clickType);
@@ -61,7 +61,7 @@ const startMacro = (args) => {
         break;
       }
       case "mouseup": {
-        wait(0.4);
+        wait(0.1);
         const clickType =
           hook.button == 1 ? "left" : hook.button == 2 ? "right" : "middle";
         robot.mouseToggle("up", clickType);
