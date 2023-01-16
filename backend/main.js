@@ -182,7 +182,7 @@ ipcMain.handle("capture", async (event, args) => {
   const [x, y] = mainWindow.getPosition();
   const [width, height] = mainWindow.getSize();
 
-  const bitmap = robot.screen.capture(x, y + 32, width, height - 64);
+  const bitmap = robot.screen.capture(x + 2, y + 34, width - 4, height - 68);
 
   new Jimp(
     { data: bitmap.image, width: bitmap.width, height: bitmap.height },
@@ -223,7 +223,6 @@ ipcMain.handle("save", async (event, args) => {
   switch (args.type) {
     case "new": {
       const uuid = uuidv4();
-      const bitmap = robot.screen.capture(x, y + 32, width, height - 64);
       const macro = {
         uuid: uuid,
         name: "macro-" + Object.keys(data.list).length,
@@ -281,7 +280,7 @@ ipcMain.handle("record", async (event, args) => {
     ioHook.stop();
     const [x, y] = mainWindow.getPosition();
     const [width, height] = mainWindow.getSize();
-    const bitmap = robot.screen.capture(x, y + 32, width, height - 64);
+    const bitmap = robot.screen.capture(x + 2, y + 34, width - 4, height - 68);
     new Jimp(
       { data: bitmap.image, width: bitmap.width, height: bitmap.height },
       async (err, image) => {
@@ -311,11 +310,12 @@ ipcMain.handle("play", async (event, args) => {
         mainWindow.setSize(macro.window.width, macro.window.height, false);
         await pool.exec("startMacro", [{ hooks: [...macro.hooks] }]);
         const bitmap = robot.screen.capture(
-          macro.window.x,
-          macro.window.y + 32,
-          macro.window.width,
-          macro.window.height - 64
+          macro.window.x + 2,
+          macro.window.y + 34,
+          macro.window.width - 4,
+          macro.window.height - 68
         );
+
         await new Promise(
           (resolve) =>
             new Jimp(
