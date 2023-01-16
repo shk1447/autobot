@@ -1,5 +1,5 @@
-import "./style.css";
-import "./w3.css";
+import "../../src/style.css";
+import "../../src/w3.css";
 // import { ipcRenderer } from "electron";
 // import { registViewModel } from "property-process";
 import Alpine from "alpinejs";

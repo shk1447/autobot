@@ -70,7 +70,9 @@ function createWindow() {
     alwaysOnTop: true,
   });
   // and load the index.html of the app.
-  mainWindow.loadFile(path.resolve(app.getAppPath(), "../app/index.html"));
+  mainWindow.loadFile(
+    path.resolve(app.getAppPath(), "../app/macro/index.html")
+  );
 
   mainWindow.setAlwaysOnTop(true, "screen-saver");
   mainWindow.setVisibleOnAllWorkspaces(true);
@@ -262,7 +264,7 @@ ipcMain.handle("settingWindow", async (event, args) => {
   });
   // and load the index.html of the app.
   settingWindow.loadFile(
-    path.resolve(app.getAppPath(), "../app/setting.html"),
+    path.resolve(app.getAppPath(), "../app/setting/index.html"),
     { query: { test: 111 } }
   );
 

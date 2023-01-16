@@ -1,5 +1,5 @@
-import "./style.css";
-import "./w3.css";
+import "../../src/style.css";
+import "../../src/w3.css";
 import { ipcRenderer } from "electron";
 import Alpine from "alpinejs";
 import "@fortawesome/fontawesome-free/js/all.js";

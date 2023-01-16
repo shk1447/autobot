@@ -3,18 +3,18 @@ import { resolve } from "path";
 import renderer from "vite-plugin-electron-renderer";
 
 export default defineConfig({
-  base: "./",
+  root: "./pages",
   build: {
-    outDir: "../app",
+    outDir: resolve(__dirname, "../app"),
     rollupOptions: {
       input: {
-        index: resolve(__dirname, "index.html"),
-        setting: resolve(__dirname, "setting.html"),
+        macro: resolve(__dirname, "./pages/macro/index.html"),
+        setting: resolve(__dirname, "./pages/setting/index.html"),
       },
       output: {
-        entryFileNames: `[name].js`,
-        chunkFileNames: `[name].js`,
-        assetFileNames: `[name].[ext]`,
+        entryFileNames: `[name]/index.js`,
+        chunkFileNames: `libs/[name].js`,
+        assetFileNames: `assets/[name].[ext]`,
       },
     },
   },
