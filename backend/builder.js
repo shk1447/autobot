@@ -53,8 +53,8 @@ var config = {
     new CopyWebpackPlugin({
       patterns: [
         {
-          from: resolve("./src"),
-          to: resolve(`../${target}/src`),
+          from: resolve("./worker"),
+          to: resolve(`../${target}/worker`),
         },
       ],
     }),

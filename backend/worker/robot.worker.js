@@ -1,7 +1,15 @@
+const keycode = require("keycode");
 const robot = require("@jitsi/robotjs");
 const workerpool = require("workerpool");
-const keycode = require("keycode");
-const { wait } = require("./utils");
+
+const wait = (sec) => {
+  const start = Date.now();
+  let now = start;
+
+  while (now - start < sec * 1000) {
+    now = Date.now();
+  }
+};
 
 /*
 
@@ -29,7 +37,7 @@ const missingKey = {
   93: "right command",
 };
 
-const startMacro = (args) => {
+const start_robot = (args) => {
   const { hooks } = args;
   const clicks = hooks.filter((d) => d.type == "mousedown");
   hooks.splice(hooks.indexOf(clicks[clicks.length - 1]), 3);
@@ -130,6 +138,7 @@ const startMacro = (args) => {
   }
   return true;
 };
+
 workerpool.worker({
-  startMacro: startMacro,
+  start_robot: start_robot,
 });

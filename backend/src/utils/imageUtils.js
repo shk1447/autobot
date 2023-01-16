@@ -4,9 +4,58 @@ const path = require("path");
 const { PNG } = require("pngjs");
 const pixelmatch = require("pixelmatch");
 
-const { adjustCanvas, parseImage, errorSerialize } = require("./utils");
+// const { adjustCanvas, parseImage, errorSerialize } = require(".");
 
-const compareSnapshotsPlugin = async (args) => {
+// eslint-disable-next-line arrow-body-style
+const parseImage = async (image) => {
+  return new Promise((resolve, reject) => {
+    if (!fs.existsSync(image)) {
+      reject(new Error(`Snapshot ${image} does not exist.`));
+      return;
+    }
+
+    const fd = fs.createReadStream(image);
+    /* eslint-disable func-names */
+    fd.pipe(new PNG())
+      .on("parsed", function () {
+        const that = this;
+        resolve(that);
+      })
+      .on("error", (error) => reject(error));
+    /* eslint-enable func-names */
+  });
+};
+
+const errorSerialize = (error) =>
+  JSON.stringify(
+    Object.getOwnPropertyNames(error).reduce(
+      (obj, prop) =>
+        Object.assign(obj, {
+          [prop]: error[prop],
+        }),
+      {}
+    )
+  );
+
+function adjustCanvas(image, width, height) {
+  if (image.width === width && image.height === height) {
+    // fast-path
+    return image;
+  }
+
+  const imageAdjustedCanvas = new PNG({
+    width,
+    height,
+    bitDepth: image.bitDepth,
+    inputHasAlpha: true,
+  });
+
+  PNG.bitblt(image, imageAdjustedCanvas, 0, 0, image.width, image.height, 0, 0);
+
+  return imageAdjustedCanvas;
+}
+
+const compareImages = async (args) => {
   const alwaysGenerateDiff = true;
 
   const errorThreshold = 50;
@@ -63,5 +112,8 @@ const compareSnapshotsPlugin = async (args) => {
 };
 
 module.exports = {
-  compareSnapshotsPlugin,
+  compareImages,
+  parseImage,
+  adjustCanvas,
+  errorSerialize,
 };

@@ -8,13 +8,16 @@ const path = require("path");
 const fs = require("fs-extra");
 const ioHook = require("iohook");
 const robot = require("@jitsi/robotjs");
-const { compareSnapshotsPlugin } = require("./src/compare");
+const { compareImages } = require("./src/utils");
 const workerpool = require("workerpool");
 const { wait, createFolder } = require("./src/utils");
 const { v4: uuidv4 } = require("uuid");
 const moment = require("moment");
 
 const unhandled = require("electron-unhandled");
+
+const test = require("./src/manager/HookManager");
+console.log(test);
 
 unhandled({
   logger: (err) => {
@@ -33,7 +36,7 @@ const userDataPath = path.resolve(app.getPath("userData"));
 createFolder(userDataPath, true);
 
 const pool = workerpool.pool(
-  path.resolve(app.getAppPath(), "./src/macro.worker.js")
+  path.resolve(app.getAppPath(), "./worker/robot.worker.js")
 );
 
 let mainWindow;
@@ -263,8 +266,6 @@ ipcMain.handle("settingWindow", async (event, args) => {
     { query: { test: 111 } }
   );
 
-  settingWindow.webContents.openDevTools();
-
   settingWindow.once("ready-to-show", () => {
     settingWindow.show();
   });
@@ -356,7 +357,7 @@ ipcMain.handle("play", async (event, args) => {
 
   try {
     if (args == undefined) {
-      await pool.exec("startMacro", [{ hooks: hookArray }], {
+      await pool.exec("start_robot", [{ hooks: hookArray }], {
         on: function (payload) {
           console.log(payload);
         },
@@ -366,7 +367,7 @@ ipcMain.handle("play", async (event, args) => {
         const macro = data.list[uuid];
         mainWindow.setPosition(macro.window.x, macro.window.y);
         mainWindow.setSize(macro.window.width, macro.window.height, false);
-        await pool.exec("startMacro", [{ hooks: [...macro.hooks] }], {
+        await pool.exec("start_robot", [{ hooks: [...macro.hooks] }], {
           on: function (payload) {
             console.log(payload);
           },
@@ -391,7 +392,7 @@ ipcMain.handle("play", async (event, args) => {
                 await image.write(
                   path.resolve(macro.path.directory, macro.path.actual)
                 );
-                const result = await compareSnapshotsPlugin({
+                const result = await compareImages({
                   base: path.resolve(macro.path.directory, macro.path.base),
                   actual: path.resolve(macro.path.directory, macro.path.actual),
                   diff: path.resolve(macro.path.directory, macro.path.diff),

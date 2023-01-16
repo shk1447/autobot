@@ -8,7 +8,7 @@ export default defineConfig({
     outDir: "../app",
     rollupOptions: {
       input: {
-        main: resolve(__dirname, "index.html"),
+        index: resolve(__dirname, "index.html"),
         setting: resolve(__dirname, "setting.html"),
       },
       output: {
