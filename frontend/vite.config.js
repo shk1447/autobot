@@ -18,5 +18,6 @@ export default defineConfig({
       },
     },
   },
+  // WEB시 plugin 제거 필요
   plugins: [renderer({ nodeIntegration: true })],
 });
