@@ -171,6 +171,7 @@
                 class="btn"
                 
                 :disabled="$store.electron.isCapture"
+                @click="$store.electron.showSettingWindow()"
               >
               <i class="fa-solid fa-gear"></i>
               </button>

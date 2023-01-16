@@ -31,6 +31,8 @@ interface IElectron {
   through: (value: boolean) => void;
   loadItems: () => void;
   getResultImage: (item: any) => void;
+
+  showSettingWindow: () => void;
 }
 
 interface IBody {
@@ -112,6 +114,9 @@ const { handler: ElectronViewModel } = registViewModel<IElectron>({
       JSON.parse(JSON.stringify(item))
     );
     BodyViewModel.property.diffImage = result;
+  },
+  async showSettingWindow() {
+    // await ipcRenderer.invoke("settingWindow", { query: "test" });
   },
 });
 

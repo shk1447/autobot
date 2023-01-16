@@ -37,6 +37,7 @@ const pool = workerpool.pool(
 );
 
 let mainWindow;
+let settingWindow;
 let currentThrough = false;
 function createWindow() {
   // Create the browser window.
@@ -226,6 +227,45 @@ ipcMain.handle("capture", async (event, args) => {
       );
     }
   );
+});
+
+ipcMain.handle("settingWindow", async (event, args) => {
+  settingWindow = new BrowserWindow({
+    width: 500,
+    height: 250,
+    minWidth: 500,
+    minHeight: 250,
+    maxWidth: 500,
+    maxHeight: 250,
+    transparent: false,
+    kiosk: false,
+    fullscreen: false,
+    fullscreenable: true,
+    resizable: true,
+    frame: false,
+    show: true,
+    webPreferences: {
+      preload: path.join(__dirname, "preload.js"),
+      blinkFeatures: "CSSStickyPosition",
+      experimentalFeatures: true,
+      nodeIntegration: true,
+      nodeIntegrationInWorker: false,
+      contextIsolation: false,
+      webSecurity: false,
+      sandbox: false,
+      enableRemoteModule: true,
+    },
+    alwaysOnTop: true,
+  });
+  // and load the index.html of the app.
+  settingWindow.loadFile(path.resolve(app.getAppPath(), "../app/setting.html"));
+
+  settingWindow.once("ready-to-show", () => {
+    settingWindow.show();
+  });
+  settingWindow.on("closed", function () {
+    settingWindow = undefined;
+  });
 });
 
 ipcMain.handle("load", async (event, args) => {

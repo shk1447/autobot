@@ -20,6 +20,7 @@
   "homepage": "https://github.com/shk1447/autobot#readme",
   "dependencies": {
     "@jitsi/robotjs": "^0.6.11",
+    "cron": "^2.2.0",
     "electron": "^12.2.3",
     "electron-thread": "^1.1.1",
     "electron-unhandled": "^4.0.1",

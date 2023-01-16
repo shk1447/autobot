@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Auto Capture System</title>
+  </head>
+  <body x-data>
+    <div
+      x-data
+      style="
+        display: flex;
+        flex-direction: column;
+        gap: 0px;
+        height: 100%;
+        border: 2px solid #29303e;
+      "
+    >
+      <div
+        x-data
+        style="
+          display: flex;
+          gap: 4px;
+          align-items: center;
+          height: 32px;
+          padding: 0px 8px;
+          background: #292d3e;
+          color: white;
+          width: 100%;
+        "
+      >
+        <div
+          style="
+            flex: 1;
+            -webkit-app-region: drag;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+          "
+        ></div>
+        <button class="btn">
+          <i class="fa-solid fa-window-minimize"></i>
+        </button>
+        <button class="btn">
+          <i class="fa-solid fa-window-maximize"></i>
+        </button>
+        <button class="btn">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+    </div>
+    <script type="module" src="/src/setting.ts"></script>
+  </body>
+</html>
