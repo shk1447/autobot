@@ -36,12 +36,12 @@ const startMacro = (args) => {
   for (var hook of hooks) {
     switch (hook.type) {
       case "mousemove": {
-        wait(0.0002);
+        wait(hook.wait_time / 1000);
         robot.moveMouse(hook.x, hook.y);
         break;
       }
       case "mousewheel": {
-        wait(0.1);
+        wait(hook.wait_time / 1000);
         robot.scrollMouse(0, -hook.rotation * hook.amount * 40);
         break;
       }
@@ -53,27 +53,26 @@ const startMacro = (args) => {
         break;
       }
       case "mousedown": {
-        wait(0.1);
+        wait(hook.wait_time / 1000);
         const clickType =
           hook.button == 1 ? "left" : hook.button == 2 ? "right" : "middle";
         robot.mouseToggle("down", clickType);
-
         break;
       }
       case "mouseup": {
-        wait(0.1);
+        wait(hook.wait_time / 1000);
         const clickType =
           hook.button == 1 ? "left" : hook.button == 2 ? "right" : "middle";
         robot.mouseToggle("up", clickType);
         break;
       }
       case "mousedrag": {
-        wait(0.0002);
+        wait(hook.wait_time / 1000);
         robot.dragMouse(hook.x, hook.y);
         break;
       }
       case "keyup": {
-        wait(0.05);
+        wait(hook.wait_time / 1000);
 
         const modifier = [];
 
@@ -89,7 +88,6 @@ const startMacro = (args) => {
           key = keycode(hook.rawcode);
         }
 
-        console.log(key);
         try {
           robot.keyToggle(key, "up", modifier);
         } catch (error) {
@@ -98,7 +96,7 @@ const startMacro = (args) => {
         break;
       }
       case "keydown": {
-        wait(0.05);
+        wait(hook.wait_time / 1000);
 
         const modifier = [];
 
@@ -114,13 +112,19 @@ const startMacro = (args) => {
           key = keycode(hook.rawcode);
         }
 
-        console.log(key);
         try {
           robot.keyToggle(key, "down", modifier);
         } catch (error) {
           console.warn(`missing key ${key} : ${hook.rawcode}`);
         }
         break;
+      }
+      case "snapshot": {
+        // NOTE: 다중 스냅 체크 기능을 추가할 예정...
+        break;
+      }
+      default: {
+        wait(hook.wait_time / 1000);
       }
     }
   }

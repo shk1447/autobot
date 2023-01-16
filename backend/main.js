@@ -1,4 +1,5 @@
 // Modules to control application life and create native browser window
+const { performance } = require("perf_hooks");
 const { app, BrowserWindow, ipcMain } = require("electron");
 
 const _ = require("lodash");
@@ -12,8 +13,6 @@ const workerpool = require("workerpool");
 const { wait, createFolder } = require("./src/utils");
 const { v4: uuidv4 } = require("uuid");
 const moment = require("moment");
-
-console.log(app.isPackaged);
 
 const unhandled = require("electron-unhandled");
 
@@ -141,33 +140,64 @@ ipcMain.handle("click-through", async (event, args) => {
 
 let hookArray = [];
 let hookImage;
-ioHook.useRawcode(false);
+let startTime;
 
+ipcMain.handle("record", async (event, args) => {
+  if (args) {
+    hookArray = [];
+    hookImage = undefined;
+    startTime = performance.now();
+    ioHook.start();
+    ioHook.start(true);
+  } else {
+    ioHook.stop();
+    const [x, y] = mainWindow.getPosition();
+    const [width, height] = mainWindow.getSize();
+    const bitmap = robot.screen.capture(x + 2, y + 34, width - 4, height - 68);
+    new Jimp(
+      { data: bitmap.image, width: bitmap.width, height: bitmap.height },
+      async (err, image) => {
+        hookImage = image;
+      }
+    );
+    hookArray.push({ type: "wait", wait_time: startTime - performance.now() });
+    startTime = undefined;
+  }
+});
+
+ioHook.useRawcode(false);
 ioHook.on("mousemove", (event) => {
-  hookArray.push(event);
+  hookArray.push({ ...event, wait_time: performance.now() - startTime });
+  startTime = performance.now();
 });
 ioHook.on("mouseclick", (event) => {
   // hookArray.push(event);
 });
 ioHook.on("mousedrag", (event) => {
-  hookArray.push(event);
+  hookArray.push({ ...event, wait_time: performance.now() - startTime });
+  startTime = performance.now();
 });
 ioHook.on("mousedown", (event) => {
-  hookArray.push(event);
+  hookArray.push({ ...event, wait_time: performance.now() - startTime });
+  startTime = performance.now();
 });
 ioHook.on("mousewheel", (event) => {
-  hookArray.push(event);
+  hookArray.push({ ...event, wait_time: performance.now() - startTime });
+  startTime = performance.now();
 });
 ioHook.on("mouseup", (event) => {
-  hookArray.push(event);
+  hookArray.push({ ...event, wait_time: performance.now() - startTime });
+  startTime = performance.now();
 });
 ioHook.on("keydown", (event) => {
   // NOTE: 나중에 작업하자...
-  hookArray.push(event);
+  hookArray.push({ ...event, wait_time: performance.now() - startTime });
+  startTime = performance.now();
 });
 ioHook.on("keyup", (event) => {
   // NOTE: 나중에 작업하자...
-  hookArray.push(event);
+  hookArray.push({ ...event, wait_time: performance.now() - startTime });
+  startTime = performance.now();
 });
 
 robot.setMouseDelay(0);
@@ -187,7 +217,7 @@ ipcMain.handle("capture", async (event, args) => {
   new Jimp(
     { data: bitmap.image, width: bitmap.width, height: bitmap.height },
     async (err, image) => {
-      console.log(userDataPath);
+      // hookImage = image;
       await image.write(
         path.resolve(
           userDataPath,
@@ -253,7 +283,6 @@ ipcMain.handle("save", async (event, args) => {
       break;
     }
     case "remove": {
-      console.log(args);
       if (args.uuid != undefined) {
         fs.removeSync(path.resolve(userDataPath, `./snapshots/${args.uuid}`));
         delete data.list[args.uuid];
@@ -270,26 +299,6 @@ ipcMain.handle("save", async (event, args) => {
   hookImage = undefined;
 });
 
-ipcMain.handle("record", async (event, args) => {
-  if (args) {
-    hookArray = [];
-    hookImage = undefined;
-    ioHook.start();
-    ioHook.start(true);
-  } else {
-    ioHook.stop();
-    const [x, y] = mainWindow.getPosition();
-    const [width, height] = mainWindow.getSize();
-    const bitmap = robot.screen.capture(x + 2, y + 34, width - 4, height - 68);
-    new Jimp(
-      { data: bitmap.image, width: bitmap.width, height: bitmap.height },
-      async (err, image) => {
-        hookImage = image;
-      }
-    );
-  }
-});
-
 ipcMain.handle("getResultImage", async (event, args) => {
   const readFile = fs.readFileSync(path.resolve(args.directory, args.diff));
   let encode = Buffer.from(readFile).toString("base64");
@@ -302,13 +311,22 @@ ipcMain.handle("play", async (event, args) => {
 
   try {
     if (args == undefined) {
-      await pool.exec("startMacro", [{ hooks: hookArray }]);
+      await pool.exec("startMacro", [{ hooks: hookArray }], {
+        on: function (payload) {
+          console.log(payload);
+        },
+      });
     } else {
       for (var uuid of args) {
         const macro = data.list[uuid];
         mainWindow.setPosition(macro.window.x, macro.window.y);
         mainWindow.setSize(macro.window.width, macro.window.height, false);
-        await pool.exec("startMacro", [{ hooks: [...macro.hooks] }]);
+        await pool.exec("startMacro", [{ hooks: [...macro.hooks] }], {
+          on: function (payload) {
+            console.log(payload);
+          },
+        });
+
         const bitmap = robot.screen.capture(
           macro.window.x + 2,
           macro.window.y + 34,
@@ -340,7 +358,7 @@ ipcMain.handle("play", async (event, args) => {
               }
             )
         );
-        wait(0.5);
+        wait(1);
       }
     }
   } catch (error) {
