@@ -64,7 +64,7 @@
           align-items: center;
           gap: 4px;
         "
-        @mouseenter="$store.electron.through(false)"
+        @mousemove="$store.electron.through(false)"
         @mouseleave="$store.electron.through(true)"
       >
         <div style="display: flex; align-items: center; gap: 4px">
@@ -77,7 +77,7 @@
             <i class="fa-solid fa-play"></i> PLAY
           </button>
           <label class="switch">
-            <input type="checkbox" @change="$store.electron.toggleCapture()" />
+            <input type="checkbox" :checked="$store.electron.isCapture" @change="$store.electron.toggleCapture()" />
             <span class="slider"></span>
           </label>
           <span
@@ -86,6 +86,9 @@
           ></span>
         </div>
         <div style="flex: 1"></div>
+        <button class="btn" @click="$store.footer.openUserFolder();">
+          <i class="fa-solid fa-folder"></i> OPEN DATA FOLDER
+        </button>
         <button class="btn" @click="$store.footer.snapshot();">
           <i class="fa-solid fa-camera"></i> SNAPSHOT
         </button>

@@ -51,6 +51,7 @@ interface IFooter {
     name: string;
   }) => void;
   toggleSetting: (val: boolean) => void;
+  openUserFolder: () => void;
 }
 
 const { handler: BodyViewModel } = registViewModel<IBody>({
@@ -80,6 +81,11 @@ const { handler: HeaderViewModel } = registViewModel<IHeader>({
 
 const { handler: ElectronViewModel } = registViewModel<IElectron>({
   init() {
+    document.addEventListener("keyup", (e) => {
+      if (e.ctrlKey && e.key == "t") {
+        this.toggleCapture();
+      }
+    });
     ElectronViewModel.property = this;
     ElectronViewModel.reset();
     this.loadItems();
@@ -92,13 +98,15 @@ const { handler: ElectronViewModel } = registViewModel<IElectron>({
     this.items = result.list;
     this.current = result.current;
   },
-  toggleCapture() {
+  async toggleCapture() {
     this.isCapture = !this.isCapture;
     if (this.isCapture) {
       FooterViewModel.state.setting = false;
       ipcRenderer.invoke("record", true);
+      await this.through(true);
     } else {
       ipcRenderer.invoke("record", false);
+      await this.through(false);
       this.loadItems();
     }
   },
@@ -139,6 +147,9 @@ let { handler: FooterViewModel } = registViewModel<IFooter>({
   setting: true,
   toggleSetting(val: boolean) {
     this.setting = val != undefined ? val : !this.setting;
+  },
+  async openUserFolder() {
+    await ipcRenderer.invoke("openUserFolder", { query: "test" });
   },
   async save(args: {
     type: "new" | "update" | "remove";

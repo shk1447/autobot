@@ -10,10 +10,12 @@
   },
   "devDependencies": {
     "@types/alpinejs": "^3.7.1",
+    "@vitejs/plugin-legacy": "^4.0.3",
+    "electron": "12.2.3",
+    "terser": "^5.17.1",
     "typescript": "^4.9.3",
     "vite": "^4.0.0",
-    "vite-plugin-electron-renderer": "^0.11.4",
-    "electron": "12.2.3"
+    "vite-plugin-electron-renderer": "^0.11.4"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.2.1",

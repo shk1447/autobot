@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
+    "target": "ES2015",
     "useDefineForClassFields": true,
-    "module": "ESNext",
-    "lib": ["ESNext", "DOM"],
+    "module": "ES2015",
+    "lib": ["ESNext", "DOM", "ES2015"],
     "moduleResolution": "Node",
     "strict": true,
     "allowJs": true,

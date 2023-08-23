@@ -17,6 +17,7 @@ const moment = require("moment");
 const unhandled = require("electron-unhandled");
 
 const test = require("./src/manager/HookManager");
+const { spawn } = require("child_process");
 console.log(test);
 
 unhandled({
@@ -33,6 +34,7 @@ unhandled({
 });
 
 const userDataPath = path.resolve(app.getPath("userData"));
+console.log(userDataPath);
 createFolder(userDataPath, true);
 
 const pool = workerpool.pool(
@@ -352,6 +354,15 @@ ipcMain.handle("getResultImage", async (event, args) => {
   let encode = Buffer.from(readFile).toString("base64");
 
   return encode;
+});
+
+ipcMain.handle("openUserFolder", async (event, args) => {
+  let p = spawn("explorer", [userDataPath]);
+  p.on("error", (err) => {
+    p.kill();
+    return callback(err);
+  });
+  return true;
 });
 
 ipcMain.handle("play", async (event, args) => {

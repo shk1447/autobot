@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import { resolve } from "path";
 import renderer from "vite-plugin-electron-renderer";
+import legacy from "@vitejs/plugin-legacy";
 
 export default defineConfig({
   root: "./pages",
@@ -19,5 +20,10 @@ export default defineConfig({
     },
   },
   // WEB시 plugin 제거 필요
-  plugins: [renderer({ nodeIntegration: true })],
+  plugins: [
+    legacy({
+      targets: ["defaults", "not IE 11"],
+    }),
+    renderer({ nodeIntegration: true }),
+  ],
 });
