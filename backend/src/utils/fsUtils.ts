@@ -1,7 +1,7 @@
-const fs = require("fs");
+import fs from "fs";
 
 // eslint-disable-next-line arrow-body-style
-const mkdirp = async (folderPath) => {
+export const mkdirp = async (folderPath: any) => {
   return new Promise((resolve, reject) => {
     fs.mkdir(folderPath, { recursive: true }, (error) => {
       if (error) {
@@ -13,7 +13,7 @@ const mkdirp = async (folderPath) => {
   });
 };
 
-const createFolder = async (folderPath, failSilently) => {
+export const createFolder = async (folderPath: any, failSilently: any) => {
   if (!fs.existsSync(folderPath)) {
     try {
       await mkdirp(folderPath);

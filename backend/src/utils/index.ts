@@ -1,4 +1,4 @@
-const wait = (sec) => {
+export const wait = (sec: any) => {
   const start = Date.now();
   let now = start;
 
@@ -7,7 +7,7 @@ const wait = (sec) => {
   }
 };
 
-const pad = (number, length) => {
+export const pad = (number: any, length: any) => {
   var str = "" + number;
   while (str.length < length) {
     str = "0" + str;
@@ -16,11 +16,5 @@ const pad = (number, length) => {
   return str;
 };
 
-const imageUtils = require("./imageUtils");
-const fsUtils = require("./fsUtils");
-module.exports = {
-  wait,
-  pad,
-  ...fsUtils,
-  ...imageUtils,
-};
+export * from "./imageUtils";
+export * from "./fsUtils";

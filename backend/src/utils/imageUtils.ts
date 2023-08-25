@@ -1,13 +1,13 @@
-const fs = require("fs");
-const fsp = require("fs/promises");
-const path = require("path");
-const { PNG } = require("pngjs");
-const pixelmatch = require("pixelmatch");
+import fs from "fs";
+import fsp from "fs/promises";
+import path from "path";
+import { PNG } from "pngjs";
+import pixelmatch from "pixelmatch";
 
 // const { adjustCanvas, parseImage, errorSerialize } = require(".");
 
 // eslint-disable-next-line arrow-body-style
-const parseImage = async (image) => {
+export const parseImage = async (image: any) => {
   return new Promise((resolve, reject) => {
     if (!fs.existsSync(image)) {
       reject(new Error(`Snapshot ${image} does not exist.`));
@@ -26,7 +26,7 @@ const parseImage = async (image) => {
   });
 };
 
-const errorSerialize = (error) =>
+export const errorSerialize = (error: any) =>
   JSON.stringify(
     Object.getOwnPropertyNames(error).reduce(
       (obj, prop) =>
@@ -37,7 +37,7 @@ const errorSerialize = (error) =>
     )
   );
 
-function adjustCanvas(image, width, height) {
+export const adjustCanvas = (image: any, width: any, height: any) => {
   if (image.width === width && image.height === height) {
     // fast-path
     return image;
@@ -53,9 +53,9 @@ function adjustCanvas(image, width, height) {
   PNG.bitblt(image, imageAdjustedCanvas, 0, 0, image.width, image.height, 0, 0);
 
   return imageAdjustedCanvas;
-}
+};
 
-const compareImages = async (args) => {
+export const compareImages = async (args: any) => {
   const alwaysGenerateDiff = true;
 
   const errorThreshold = 50;
@@ -69,8 +69,8 @@ const compareImages = async (args) => {
   let mismatchedPixels = 0;
   let percentage = 0;
   try {
-    const imgExpected = await parseImage(options.expectedImage);
-    const imgActual = await parseImage(options.actualImage);
+    const imgExpected = (await parseImage(options.expectedImage)) as any;
+    const imgActual = (await parseImage(options.actualImage)) as any;
     const diff = new PNG({
       width: Math.max(imgActual.width, imgExpected.width),
       height: Math.max(imgActual.height, imgExpected.height),
@@ -109,11 +109,4 @@ const compareImages = async (args) => {
     mismatchedPixels,
     percentage,
   };
-};
-
-module.exports = {
-  compareImages,
-  parseImage,
-  adjustCanvas,
-  errorSerialize,
 };

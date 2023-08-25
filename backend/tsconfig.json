@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es6",
+    "noImplicitAny": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "forceConsistentCasingInFileNames": true,
+    "sourceMap": true,
+    "outDir": "../app",
+    "baseUrl": ".",
+    "paths": {
+      "@app/*": ["../backend/*"],
+      "@shared/*": ["../shared/*"]
+    },
+    "allowJs": true
+    // "declaration": true,
+    // "declarationDir": "./types"
+  },
+  "include": ["../backend/**/*.ts", "../shared/**/*.ts"]
+}

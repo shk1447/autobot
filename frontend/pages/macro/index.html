@@ -30,6 +30,7 @@
           color: white;
           width: 100%;
         "
+        
       >
         <div x-text="$store.header.title"></div>
         <div
@@ -38,9 +39,7 @@
             -webkit-app-region: drag;
             width: 100%;
             height: 100%;
-            background: transparent;
           "
-          
         ></div>
         <button class="btn" @click="$store.header.minimize()">
           <i class="fa-solid fa-window-minimize"></i>
@@ -52,7 +51,7 @@
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
-      <div x-data :style="$store.body.diffImage ? `flex:1; background:url('data:image/png;base64,${$store.body.diffImage}')`:'flex: 1;'"></div>
+      <div x-data @mouseleave="$store.electron.through(false)" @mouseenter="$store.electron.through(true)" :style="$store.body.diffImage ? `flex:1; background:url('data:image/png;base64,${$store.body.diffImage}')`:'flex: 1;'"></div>
       <div
         x-data
         style="
@@ -64,8 +63,6 @@
           align-items: center;
           gap: 4px;
         "
-        @mousemove="$store.electron.through(false)"
-        @mouseleave="$store.electron.through(true)"
       >
         <div style="display: flex; align-items: center; gap: 4px">
           <button
@@ -85,7 +82,7 @@
             x-text="$store.electron.isCapture ? 'Capturing...' : 'Preparing...'"
           ></span>
         </div>
-        <div style="flex: 1"></div>
+        <div style="flex: 1" @mousemove="$store.electron.through(true)"></div>
         <button class="btn" @click="$store.footer.openUserFolder();">
           <i class="fa-solid fa-folder"></i> OPEN DATA FOLDER
         </button>

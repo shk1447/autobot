@@ -1,0 +1,314 @@
+{
+	"components": {
+		"examples": {},
+		"headers": {},
+		"parameters": {},
+		"requestBodies": {},
+		"responses": {},
+		"schemas": {
+			"Hook": {
+				"properties": {
+					"result": {
+						"properties": {
+							"percentage": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"percentage"
+						],
+						"type": "object"
+					},
+					"path": {
+						"properties": {
+							"diff": {
+								"type": "string",
+								"description": "매크로 실행 결과과 생성 결과를 비교한 이미지 경로"
+							},
+							"actual": {
+								"type": "string",
+								"description": "매크로 실행 후 결과 이미지 경로"
+							},
+							"base": {
+								"type": "string",
+								"description": "매크로 생성 당시에 결과 이미지 경로"
+							},
+							"directory": {
+								"type": "string",
+								"description": "매크로 저장결과 폴더경로"
+							}
+						},
+						"required": [
+							"diff",
+							"actual",
+							"base",
+							"directory"
+						],
+						"type": "object",
+						"description": "매크로에 대한 아웃풋 이미지들"
+					},
+					"cron": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array",
+						"description": "매크로에 대한 스케쥴 설정값"
+					},
+					"name": {
+						"type": "string",
+						"description": "매크로의 이름"
+					},
+					"uuid": {
+						"type": "string",
+						"description": "매크로의 실행키"
+					}
+				},
+				"required": [
+					"result",
+					"path",
+					"cron",
+					"name",
+					"uuid"
+				],
+				"type": "object"
+			},
+			"IResponse_Hook-Array.any_": {
+				"properties": {
+					"message": {
+						"type": "string"
+					},
+					"result": {
+						"items": {
+							"$ref": "#/components/schemas/Hook"
+						},
+						"type": "array"
+					},
+					"meta": {}
+				},
+				"required": [
+					"message",
+					"result",
+					"meta"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IResponse_boolean.any_": {
+				"properties": {
+					"message": {
+						"type": "string"
+					},
+					"result": {
+						"type": "boolean"
+					},
+					"meta": {}
+				},
+				"required": [
+					"message",
+					"result",
+					"meta"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IResponse_Hook.any_": {
+				"properties": {
+					"message": {
+						"type": "string"
+					},
+					"result": {
+						"$ref": "#/components/schemas/Hook"
+					},
+					"meta": {}
+				},
+				"required": [
+					"message",
+					"result",
+					"meta"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IResponse_string.any_": {
+				"properties": {
+					"message": {
+						"type": "string"
+					},
+					"result": {
+						"type": "string"
+					},
+					"meta": {}
+				},
+				"required": [
+					"message",
+					"result",
+					"meta"
+				],
+				"type": "object",
+				"additionalProperties": false
+			}
+		},
+		"securitySchemes": {}
+	},
+	"info": {
+		"title": "autobot",
+		"version": "1.0.0",
+		"license": {
+			"name": "ISC"
+		},
+		"contact": {}
+	},
+	"openapi": "3.0.0",
+	"paths": {
+		"/hook/load": {
+			"get": {
+				"operationId": "Load",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IResponse_Hook-Array.any_"
+								}
+							}
+						}
+					}
+				},
+				"description": "매크로 리스트를 반환해주는 API",
+				"tags": [
+					"Hook"
+				],
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/hook/play/state": {
+			"get": {
+				"operationId": "PlayState",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IResponse_boolean.any_"
+								}
+							}
+						}
+					}
+				},
+				"description": "현재 매크로의 동작 유/무를 반환해주는 API",
+				"tags": [
+					"Hook"
+				],
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/hook/play": {
+			"get": {
+				"operationId": "PlayAll",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IResponse_Hook-Array.any_"
+								}
+							}
+						}
+					}
+				},
+				"description": "등록된 모든 매크로를 실행하는 API",
+				"tags": [
+					"Hook"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "동기/비동기를 선택할 수 있는 옵션",
+						"in": "query",
+						"name": "sync",
+						"required": true,
+						"schema": {
+							"type": "boolean"
+						}
+					}
+				]
+			}
+		},
+		"/hook/play/{uuid}": {
+			"get": {
+				"operationId": "Play",
+				"responses": {
+					"200": {
+						"description": "ㅅㅅㅅ",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IResponse_Hook.any_"
+								}
+							}
+						}
+					}
+				},
+				"description": "매크로 단일실행 API",
+				"tags": [
+					"Hook"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "실행할 매크로 uuid",
+						"in": "path",
+						"name": "uuid",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "비동기/동기 방식 옵션",
+						"in": "query",
+						"name": "sync",
+						"required": true,
+						"schema": {
+							"type": "boolean"
+						}
+					}
+				]
+			}
+		},
+		"/hook/capture": {
+			"get": {
+				"operationId": "Capture",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IResponse_string.any_"
+								}
+							}
+						}
+					}
+				},
+				"description": "현재 설치된 장비의 스크린 캡쳐에 대한 base64를 제공하는 API",
+				"tags": [
+					"Hook"
+				],
+				"security": [],
+				"parameters": []
+			}
+		}
+	},
+	"servers": [
+		{
+			"url": "/"
+		}
+	]
+}

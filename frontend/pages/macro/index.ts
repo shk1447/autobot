@@ -111,9 +111,7 @@ const { handler: ElectronViewModel } = registViewModel<IElectron>({
     }
   },
   async through(value: boolean) {
-    if (ElectronViewModel.property.isCapture) {
-      await ipcRenderer.invoke("click-through", { through: value });
-    }
+    await ipcRenderer.invoke("click-through", { through: value });
   },
   async getResultImage(item: any) {
     FooterViewModel.property.setting = false;

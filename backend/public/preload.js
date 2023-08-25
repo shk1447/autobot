@@ -5,6 +5,14 @@
  *
  * https://www.electronjs.org/docs/latest/tutorial/sandbox
  */
+
+const ipcRenderer = require("electron").ipcRenderer;
+
+ipcRenderer.on("config", (event, data) => {
+  localStorage.setItem("HOST", data.host);
+  localStorage.setItem("PORT", data.port);
+});
+
 window.addEventListener("DOMContentLoaded", () => {
   const replaceText = (selector, text) => {
     const element = document.getElementById(selector);
