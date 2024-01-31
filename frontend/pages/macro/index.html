@@ -64,14 +64,18 @@
           gap: 4px;
         "
       >
+      
         <div style="display: flex; align-items: center; gap: 4px">
+          <button class="btn" @click="$store.footer.save({type:'new'});" :disabled="$store.electron.current.save || $store.electron.isCapture">
+            <i class="fa-regular fa-floppy-disk"></i> 매크로 저장
+          </button>
           <button
             type="button"
             class="btn"
             @click="$store.footer.play()"
             :disabled="$store.electron.isCapture"
           >
-            <i class="fa-solid fa-play"></i> PLAY
+            <i class="fa-solid fa-play"></i> 실행
           </button>
           <label class="switch">
             <input type="checkbox" :checked="$store.electron.isCapture" @change="$store.electron.toggleCapture()" />
@@ -79,22 +83,30 @@
           </label>
           <span
             style="font-weight: bold"
-            x-text="$store.electron.isCapture ? 'Capturing...' : 'Preparing...'"
+            x-text="$store.electron.isCapture ? '마우스 키보드 정보 저장중...' : '왼쪽 토글을 클릭 시 캡쳐를 시작합니다.'"
           ></span>
         </div>
         <div style="flex: 1" @mousemove="$store.electron.through(true)"></div>
-        <button class="btn" @click="$store.footer.openUserFolder();">
-          <i class="fa-solid fa-folder"></i> OPEN DATA FOLDER
-        </button>
-        <button class="btn" @click="$store.footer.snapshot();">
-          <i class="fa-solid fa-camera"></i> SNAPSHOT
-        </button>
-        <button class="btn" @click="$store.footer.save({type:'new'});" :disabled="$store.electron.current.save || $store.electron.isCapture">
-          <i class="fa-regular fa-floppy-disk"></i> SAVE
-        </button>
-        <button class="btn" @click="$store.footer.toggleSetting()">
-          <i class="fa-solid fa-list"></i>
-        </button>
+        <div style="display: flex; align-items: center; gap: 4px" x-data="$store.electron">
+          <button class="btn" @click="$store.footer.openUserFolder();">
+            <i class="fa-solid fa-folder"></i> 데이터 폴더 열기
+          </button>
+          <!-- <button class="btn" @click="$store.footer.snapshot();">
+            <i class="fa-solid fa-camera"></i> 스크린샷 찍기
+          </button> -->
+          
+          <input placeholder="시나리오 이름을 입력" x-model="sceneName" style="background: transparent; border: 0px; border-bottom: 1px solid grey; color: white;" />
+          <button class="btn" @click="$store.footer.saveScene();" :disabled="Object.keys($store.electron.items).length == 0 ? true : false">
+            <i class="fa-regular fa-floppy-disk"></i> 시나리오 저장
+          </button>
+          <button class="btn" @click="$store.footer.loadScene();" >
+            <i class="fa-regular fa-floppy-disk"></i> 시나리오 불러오기
+          </button>
+          <button class="btn" @click="$store.footer.toggleSetting()">
+            <i class="fa-solid fa-list"></i>
+          </button>
+        </div>
+        
       </div>
     </div>
     <div
@@ -109,28 +121,28 @@
         overflow: hidden;
       "
     >
-      <div style="grid-template-rows:28px repeat(auto-fill, minmax(28px, 28px)); grid-template-columns: 36px auto 80px 128px; display: grid; overflow:auto; height:100%; contain:strict; content-visibility: auto;">
+      <div style="grid-template-rows:28px repeat(auto-fill, minmax(28px, 28px)); grid-template-columns: 100px auto 80px 128px; display: grid; overflow:auto; height:100%; contain:strict; content-visibility: auto;">
         <div style="display: contents;">
-          <div style="position:sticky; top:0; background: #2b314e; height:100%;display: flex; align-items: center; justify-content: center; padding:4px">No.</div>
+          <div style="position:sticky; top:0; background: #2b314e; height:100%;display: flex; align-items: center; justify-content: start; padding:4px">No.</div>
           <div style="position:sticky; top:0; background: #2b314e; height:100%;display: flex; align-items: center; justify-content: center; padding:4px">Name</div>
           <div style="position:sticky; top:0; background: #2b314e; height:100%;display: flex; align-items: center; justify-content: center; padding:4px">Diff (%)</div>
           <div style="position:sticky; top:0; background: #2b314e; height:100%;display: flex; align-items: center; justify-content: center; padding:4px">
               <button
                 type="button"
                 class="btn"
-                @click="$store.footer.play(Object.keys($store.electron.items))"
+                @click="$store.footer.play(Object.keys($store.electron.items), true)"
                 :disabled="$store.electron.isCapture"
               >
                 <i class="fa-solid fa-play"></i>
               </button>
 
-              <button
+              <!-- <button
                 type="button"
                 class="btn"
                 :disabled="$store.electron.isCapture"
               >
               <i class="fa-solid fa-gear"></i>
-              </button>
+              </button> -->
 
               <button
                 type="button"
@@ -144,7 +156,30 @@
         </div>
         <template x-for="(item,idx) in Object.values($store.electron.items)">
           <div style="display: contents;">
-            <div style="height:24px;display: flex; align-items: center; justify-content: center; padding:4px" x-text="idx+1"></div>
+            <!--  -->
+              <div style="height:24px; width:60px;display: flex; align-items: center; justify-content: center; padding:4px;">
+                <div style="height:24px;display: flex; align-items: center; justify-content: center; padding:8px" x-text="idx+1"></div>
+                <button
+                  type="button"
+                  class="btn"
+                  
+                  :disabled="$store.electron.isCapture"
+                  @click="$store.footer.save({type:'up',uuid:item.uuid})"
+                >
+                <i class="fa-solid fa-arrow-up"></i>
+                </button>
+                <button
+                  type="button"
+                  class="btn"
+                  
+                  :disabled="$store.electron.isCapture"
+                  @click="$store.footer.save({type:'down',uuid:item.uuid})"
+                >
+                <i class="fa-solid fa-arrow-down"></i>
+                </button>
+                
+              </div>
+            <!-- </div> -->
             <div style="height:24px;display: flex; align-items: center; padding:4px">
               <input type="text" style="width:100%; border: none; background: transparent; color:white;" x-model="item.name" @blur="$store.footer.save({type:'update',uuid:item.uuid, name:item.name})">
             </div>
@@ -157,6 +192,7 @@
               </div>
             </div>
             <div style="height:24px;display: flex; align-items: center; justify-content: center; padding:4px">
+              
               <button
                 type="button"
                 class="btn"
@@ -164,16 +200,6 @@
                 :disabled="$store.electron.isCapture"
               >
                 <i class="fa-solid fa-play"></i>
-              </button>
-
-              <button
-                type="button"
-                class="btn"
-                
-                :disabled="$store.electron.isCapture"
-                @click="$store.electron.showSettingWindow()"
-              >
-              <i class="fa-solid fa-gear"></i>
               </button>
 
               <button

@@ -3,7 +3,7 @@ import fs from "fs-extra";
 import path from "path";
 import Jimp from "jimp";
 import { performance } from "perf_hooks";
-import { app, BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow, dialog, ipcMain } from "electron";
 import ioHook from "iohook";
 import robot from "@jitsi/robotjs";
 import workerpool from "workerpool";
@@ -11,8 +11,10 @@ const pool = workerpool.pool(
   path.resolve(app.getAppPath(), "./worker/robot.worker.js")
 );
 import { wait, createFolder, compareImages } from "@app/src/utils";
+import _ from "lodash";
 const userDataPath = path.resolve(app.getPath("userData"));
 const dataPath = path.resolve(userDataPath, "./data.json");
+const scenePath = path.resolve(userDataPath, "./scene");
 createFolder(userDataPath, true);
 class HookService {
   mainWindow: BrowserWindow;
@@ -126,6 +128,39 @@ class HookService {
     });
   }
 
+  async loadScene() {
+    const { canceled, filePaths } = await dialog.showOpenDialog(
+      this.mainWindow,
+      {
+        properties: ["openFile"],
+        filters: [{ name: "Scene Json", extensions: ["json"] }],
+        defaultPath: scenePath,
+      }
+    );
+
+    if (!canceled) {
+      if (filePaths.length > 0) {
+        const loadedScene = fs.readFileSync(filePaths[0]);
+        fs.writeFileSync(dataPath, loadedScene);
+        this.data = JSON.parse(fs.readFileSync(dataPath, "utf-8"));
+        const sceneName = path
+          .basename(filePaths[0])
+          .replace(path.extname(filePaths[0]), "");
+        return sceneName;
+      }
+    }
+
+    return true;
+  }
+
+  async saveScene(name: string) {
+    const currentScene = fs.readFileSync(dataPath);
+    const filePath = path.resolve(scenePath, `./${name}.json`);
+    if (!fs.existsSync(filePath))
+      fs.createFileSync(path.resolve(scenePath, `./${name}.json`));
+    fs.writeFileSync(path.resolve(scenePath, `./${name}.json`), currentScene);
+  }
+
   async save(args: any) {
     const [x, y] = this.mainWindow.getPosition();
     const [width, height] = this.mainWindow.getSize();
@@ -171,6 +206,52 @@ class HookService {
         }
         break;
       }
+      case "up": {
+        const selectedIdx = Object.keys(this.data.list).indexOf(args.uuid);
+        const selectedData = { ...this.data.list[args.uuid] };
+
+        var reorder: any = {};
+        let i = 0;
+        if (selectedIdx - 1 < 0) break;
+        _.each(this.data.list, (v, k) => {
+          if (selectedIdx - 1 == i) {
+            reorder[args.uuid] = selectedData;
+          }
+          if (k != args.uuid) {
+            reorder[k] = v;
+          }
+          i++;
+        });
+        delete this.data.list[args.uuid];
+        console.log(Object.keys(reorder), selectedIdx);
+        this.data.list = reorder;
+        break;
+      }
+      case "down": {
+        const _keys = Object.keys(this.data.list);
+        const selectedIdx = _keys.indexOf(args.uuid);
+        const selectedData = { ...this.data.list[args.uuid] };
+
+        var reorder: any = {};
+        let i = 0;
+        if (selectedIdx + 1 >= _keys.length) break;
+        _.each(this.data.list, (v, k) => {
+          if (k != args.uuid) {
+            reorder[k] = v;
+          }
+          if (selectedIdx + 1 == i) {
+            reorder[args.uuid] = selectedData;
+          }
+
+          console.log(Object.keys(reorder), selectedIdx);
+
+          i++;
+        });
+        delete this.data.list[args.uuid];
+
+        this.data.list = reorder;
+        break;
+      }
     }
 
     fs.writeFileSync(dataPath, JSON.stringify(this.data));
@@ -208,7 +289,7 @@ class HookService {
     }
   }
 
-  async play(uuids?: string[]) {
+  async play(uuids?: string[], sceneName?: string) {
     this.playing = true;
     this.mainWindow.setIgnoreMouseEvents(true, { forward: true });
 
@@ -220,7 +301,12 @@ class HookService {
           },
         });
       } else {
-        for (var uuid of uuids) {
+        if (sceneName) {
+          const resultPath = path.resolve(scenePath, `./${sceneName}`);
+          if (!fs.existsSync(resultPath)) fs.mkdirSync(resultPath);
+        }
+        for (let i = 0; i < uuids.length; i++) {
+          const uuid = uuids[i];
           const macro = this.data.list[uuid];
           this.mainWindow.setPosition(macro.window.x, macro.window.y);
           this.mainWindow.setSize(
@@ -250,9 +336,37 @@ class HookService {
                   height: bitmap.height,
                 },
                 async (err: any, image: any) => {
+                  if (!fs.existsSync(macro.path.directory))
+                    fs.mkdirSync(macro.path.directory);
+
+                  const diffPath = path.resolve(
+                    macro.path.directory,
+                    macro.path.diff
+                  );
+                  const basePath = path.resolve(
+                    macro.path.directory,
+                    macro.path.base
+                  );
+                  const actualPath = path.resolve(
+                    macro.path.directory,
+                    macro.path.actual
+                  );
+                  if (!fs.existsSync(actualPath)) fs.createFileSync(actualPath);
+                  if (!fs.existsSync(basePath)) fs.createFileSync(basePath);
+                  if (!fs.existsSync(diffPath)) fs.createFileSync(diffPath);
                   await image.write(
                     path.resolve(macro.path.directory, macro.path.actual)
                   );
+                  if (sceneName) {
+                    await image.write(
+                      path.resolve(
+                        scenePath,
+                        `./${sceneName}/${String(i).padStart(2, "0")}_${
+                          macro.name
+                        }.png`
+                      )
+                    );
+                  }
                   const result = await compareImages({
                     base: path.resolve(macro.path.directory, macro.path.base),
                     actual: path.resolve(
@@ -261,7 +375,7 @@ class HookService {
                     ),
                     diff: path.resolve(macro.path.directory, macro.path.diff),
                   });
-
+                  console.log(result);
                   this.data.list[uuid].result["percentage"] = result.percentage;
                   fs.writeFileSync(dataPath, JSON.stringify(this.data));
                   resolve(true);

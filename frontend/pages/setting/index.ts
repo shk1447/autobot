@@ -6,5 +6,5 @@ import Alpine from "alpinejs";
 import "@fortawesome/fontawesome-free/js/all.js";
 
 window.Alpine = Alpine;
-
+console.log("ttt22222");
 Alpine.start();

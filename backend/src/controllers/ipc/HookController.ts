@@ -23,9 +23,16 @@ export default (window: BrowserWindow) => {
   ipcMain.handle("save", async (event, args) => {
     return await HookService.save(args);
   });
+  ipcMain.handle("loadScene", async (event, args) => {
+    return await HookService.loadScene();
+  });
+
+  ipcMain.handle("saveScene", async (event, args) => {
+    return await HookService.saveScene(args);
+  });
 
   ipcMain.handle("play", async (event, args) => {
-    return await HookService.play(args);
+    return await HookService.play(args.list, args.sceneName);
   });
 
   ipcMain.handle("getResultImage", async (event, args) => {

@@ -26,6 +26,7 @@ interface IElectron {
   init: () => void;
   isCapture: boolean;
   items: Item[];
+  sceneName: string;
   current: { save: boolean };
   toggleCapture: () => void;
   through: (value: boolean) => void;
@@ -44,7 +45,7 @@ interface IFooter {
   init: () => void;
   setting: boolean;
   snapshot: () => void;
-  play: (list: string[] | undefined) => void;
+  play: (list: string[] | undefined, isAll?: boolean) => void;
   save: (args: {
     type: "new" | "update" | "remove";
     uuid: string;
@@ -52,6 +53,8 @@ interface IFooter {
   }) => void;
   toggleSetting: (val: boolean) => void;
   openUserFolder: () => void;
+  saveScene: () => void;
+  loadScene: () => void;
 }
 
 const { handler: BodyViewModel } = registViewModel<IBody>({
@@ -92,10 +95,12 @@ const { handler: ElectronViewModel } = registViewModel<IElectron>({
   },
   isCapture: false,
   items: [],
+  sceneName: "",
   current: { save: false },
   async loadItems() {
     const result = await ipcRenderer.invoke("load");
     this.items = result.list;
+    console.log(this.items);
     this.current = result.current;
   },
   async toggleCapture() {
@@ -134,9 +139,12 @@ let { handler: FooterViewModel } = registViewModel<IFooter>({
   snapshot: async () => {
     await ipcRenderer.invoke("capture");
   },
-  async play(list: string[] | undefined) {
+  async play(list: string[] | undefined, isAll?: boolean) {
     this.setting = false;
-    await ipcRenderer.invoke("play", list);
+    await ipcRenderer.invoke("play", {
+      list: list,
+      sceneName: isAll ? ElectronViewModel.state.sceneName : undefined,
+    });
     await ElectronViewModel.property.loadItems();
     if (list != undefined) {
       this.setting = true;
@@ -150,12 +158,24 @@ let { handler: FooterViewModel } = registViewModel<IFooter>({
     await ipcRenderer.invoke("openUserFolder", { query: "test" });
   },
   async save(args: {
-    type: "new" | "update" | "remove";
+    type: "new" | "update" | "remove" | "up" | "down";
     uuid: string;
     name: string;
   }) {
     await ipcRenderer.invoke("save", args);
     ElectronViewModel.property.loadItems();
+  },
+  async saveScene() {
+    await ipcRenderer.invoke("saveScene", ElectronViewModel.state.sceneName);
+    ElectronViewModel.state.sceneName = "";
+  },
+  async loadScene() {
+    const test = await ipcRenderer.invoke(
+      "loadScene",
+      ElectronViewModel.state.sceneName
+    );
+    ElectronViewModel.state.sceneName = test;
+    await ElectronViewModel.property.loadItems();
   },
 });
 

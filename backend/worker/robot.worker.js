@@ -44,12 +44,12 @@ const start_robot = (args) => {
   for (var hook of hooks) {
     switch (hook.type) {
       case "mousemove": {
-        wait(hook.wait_time * 1.2);
+        wait(hook.wait_time * 0.9);
         robot.moveMouse(hook.x, hook.y);
         break;
       }
       case "mousewheel": {
-        wait(hook.wait_time * 1.2);
+        wait(hook.wait_time * 0.9);
         robot.scrollMouse(0, -hook.rotation * hook.amount * 40);
         break;
       }
@@ -61,26 +61,26 @@ const start_robot = (args) => {
         break;
       }
       case "mousedown": {
-        wait(hook.wait_time * 1.2);
+        wait(hook.wait_time * 0.9);
         const clickType =
           hook.button == 1 ? "left" : hook.button == 2 ? "right" : "middle";
         robot.mouseToggle("down", clickType);
         break;
       }
       case "mouseup": {
-        wait(hook.wait_time * 1.2);
+        wait(hook.wait_time * 0.9);
         const clickType =
           hook.button == 1 ? "left" : hook.button == 2 ? "right" : "middle";
         robot.mouseToggle("up", clickType);
         break;
       }
       case "mousedrag": {
-        wait(hook.wait_time * 1.2);
+        wait(hook.wait_time * 0.9);
         robot.dragMouse(hook.x, hook.y);
         break;
       }
       case "keyup": {
-        wait(hook.wait_time * 1.2);
+        wait(hook.wait_time * 0.9);
 
         const modifier = [];
 
@@ -104,7 +104,7 @@ const start_robot = (args) => {
         break;
       }
       case "keydown": {
-        wait(hook.wait_time * 1.2);
+        wait(hook.wait_time * 0.9);
 
         const modifier = [];
 
@@ -132,7 +132,7 @@ const start_robot = (args) => {
         break;
       }
       default: {
-        wait(hook.wait_time * 1.2);
+        wait(hook.wait_time * 0.9);
       }
     }
   }
