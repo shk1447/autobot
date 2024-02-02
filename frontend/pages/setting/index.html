@@ -31,6 +31,7 @@
           width: 100%;
         "
       >
+        <div>Click 이름 설정</div>
         <div
           style="
             flex: 1;
@@ -40,9 +41,153 @@
             background: transparent;
           "
         ></div>
-        <button class="btn">
+        <button class="btn" @click="$store.setting.hide();">
           <i class="fa-solid fa-xmark"></i>
         </button>
+      </div>
+      <div x-data :style="'height:100%; width:100%; flex: 1;'">
+        <div
+          x-data
+          style="
+            height: 100%;
+            background: #1f2331;
+            color: white;
+            overflow: hidden;
+          "
+        >
+          <div
+            style="
+              grid-template-rows: 28px repeat(auto-fill, minmax(28px, 28px));
+              grid-template-columns: 50px auto 80px 128px;
+              display: grid;
+              overflow: auto;
+              height: 100%;
+              contain: strict;
+              content-visibility: auto;
+            "
+          >
+            <div style="display: contents">
+              <div
+                style="
+                  position: sticky;
+                  top: 0;
+                  background: #2b314e;
+                  height: 100%;
+                  display: flex;
+                  align-items: center;
+                  justify-content: start;
+                  padding: 4px;
+                "
+              >
+                No.
+              </div>
+              <div
+                style="
+                  position: sticky;
+                  top: 0;
+                  background: #2b314e;
+                  height: 100%;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  padding: 4px;
+                "
+              >
+                Name
+              </div>
+              <div
+                style="
+                  position: sticky;
+                  top: 0;
+                  background: #2b314e;
+                  height: 100%;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  padding: 4px;
+                "
+              >
+                Pos
+              </div>
+              <div
+                style="
+                  position: sticky;
+                  top: 0;
+                  background: #2b314e;
+                  height: 100%;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  padding: 4px;
+                "
+              >
+                action
+              </div>
+            </div>
+
+            <template
+              x-for="(item,idx) in Object.values($store.setting.clicks)"
+            >
+              <div style="display: contents">
+                <div
+                  style="
+                    height: 24px;
+                    width: 60px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 4px;
+                  "
+                >
+                  <span x-text="idx"></span>
+                </div>
+                <div
+                  style="
+                    height: 24px;
+                    display: flex;
+                    align-items: center;
+                    padding: 4px;
+                  "
+                >
+                  <input
+                    type="text"
+                    style="
+                      width: 100%;
+                      border: none;
+                      background: transparent;
+                      color: white;
+                    "
+                    x-model="item.name"
+                    @blur="$store.setting.save({type:'update_click',uuid:$store.setting.uuid, idx:idx, name:item.name})"
+                  />
+                </div>
+                <div
+                  style="
+                    height: 24px;
+                    display: flex;
+                    align-items: center;
+                    padding: 4px;
+                  "
+                >
+                  x:<span x-text="item.x"></span>
+
+                  y:<span x-text="item.y"></span>
+                </div>
+                <div
+                  style="
+                    height: 24px;
+                    display: flex;
+                    align-items: center;
+                    padding: 4px;
+                    justify-content: center;
+                  "
+                >
+                  <button>Go</button>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
       </div>
     </div>
     <script type="module" src="/setting/index.ts"></script>

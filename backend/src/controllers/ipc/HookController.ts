@@ -23,6 +23,9 @@ export default (window: BrowserWindow) => {
   ipcMain.handle("save", async (event, args) => {
     return await HookService.save(args);
   });
+  ipcMain.handle("focusProcess", async (event, args) => {
+    return await HookService.focusProcess();
+  });
   ipcMain.handle("loadScene", async (event, args) => {
     return await HookService.loadScene();
   });
@@ -32,12 +35,13 @@ export default (window: BrowserWindow) => {
   });
 
   ipcMain.handle("play", async (event, args) => {
-    return await HookService.play(args.list, args.sceneName);
+    return await HookService.play(args.list, args.sceneName, args.isTest);
   });
 
   ipcMain.handle("getResultImage", async (event, args) => {
-    const readFile = fs.readFileSync(path.resolve(args.directory, args.diff));
-    let encode = Buffer.from(readFile).toString("base64");
+    // const readFile = fs.readFileSync(path.resolve(args.directory, args.path.diff));
+    // let encode = Buffer.from(readFile).toString("base64");
+    const encode = await HookService.getResultImage(args.sceneName, args.item);
 
     return encode;
   });
@@ -48,6 +52,10 @@ export default (window: BrowserWindow) => {
       p.kill();
     });
     return true;
+  });
+
+  ipcMain.handle("getClickHooks", (event, uuid) => {
+    return HookService.getClickHooks(uuid);
   });
 
   ipcMain.handle("capture", async (event, args) => {

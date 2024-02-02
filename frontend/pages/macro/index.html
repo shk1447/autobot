@@ -32,7 +32,12 @@
         "
         
       >
-        <div x-text="$store.header.title"></div>
+        <!-- <div x-text="$store.header.title"></div> -->
+        <div x-text="$store.header.selectedProcess"></div>
+        <button class="btn" @click="$store.header.focusProcess();">
+          <i class="fa-regular fa-floppy-disk"></i> 프로세스 선택
+        </button>
+        
         <div
           style="
             flex: 1;
@@ -121,12 +126,12 @@
         overflow: hidden;
       "
     >
-      <div style="grid-template-rows:28px repeat(auto-fill, minmax(28px, 28px)); grid-template-columns: 100px auto 80px 128px; display: grid; overflow:auto; height:100%; contain:strict; content-visibility: auto;">
+      <div style="grid-template-rows:28px repeat(auto-fill, minmax(28px, 28px)); grid-template-columns: 100px auto 80px 200px; display: grid; overflow:auto; height:100%; contain:strict; content-visibility: auto;">
         <div style="display: contents;">
           <div style="position:sticky; top:0; background: #2b314e; height:100%;display: flex; align-items: center; justify-content: start; padding:4px">No.</div>
           <div style="position:sticky; top:0; background: #2b314e; height:100%;display: flex; align-items: center; justify-content: center; padding:4px">Name</div>
           <div style="position:sticky; top:0; background: #2b314e; height:100%;display: flex; align-items: center; justify-content: center; padding:4px">Diff (%)</div>
-          <div style="position:sticky; top:0; background: #2b314e; height:100%;display: flex; align-items: center; justify-content: center; padding:4px">
+          <div style="position:sticky; top:0; background: #2b314e; height:100%;display: flex; align-items: center; justify-content: center; padding:4px;gap:2px;">
               <button
                 type="button"
                 class="btn"
@@ -134,15 +139,18 @@
                 :disabled="$store.electron.isCapture"
               >
                 <i class="fa-solid fa-play"></i>
+                시나리오
               </button>
 
-              <!-- <button
+              <button
                 type="button"
                 class="btn"
+                @click="$store.footer.play(Object.keys($store.electron.items), true, true)"
                 :disabled="$store.electron.isCapture"
               >
-              <i class="fa-solid fa-gear"></i>
-              </button> -->
+                <i class="fa-solid fa-play"></i>
+                테스트
+              </button>
 
               <button
                 type="button"
@@ -186,12 +194,12 @@
             <div style="height:24px;display: flex; align-items: center; justify-content: center; padding:4px">
               <div style="display: flex; gap:4px; align-items: center;;">
                 <span x-text="item.result.percentage != undefined ? ((Math.round(item.result.percentage*10000)/100)+'%') : 'No Result'"></span>
-                <button x-show="item.result.percentage != undefined ? true : false" type="button" class="btn" @click="$store.electron.getResultImage(item.path)">
+                <button x-show="item.result.percentage != undefined ? true : false" type="button" class="btn" @click="$store.electron.getResultImage(item)">
                   <i class="fa-regular fa-image"></i>
                 </button>
               </div>
             </div>
-            <div style="height:24px;display: flex; align-items: center; justify-content: center; padding:4px">
+            <div style="height:24px;display: flex; align-items: center; justify-content: center; padding:4px; gap:2px">
               
               <button
                 type="button"
@@ -200,6 +208,14 @@
                 :disabled="$store.electron.isCapture"
               >
                 <i class="fa-solid fa-play"></i>
+              </button>
+
+              <button
+                type="button"
+                class="btn"
+                @click="$store.electron.showSettingWindow(item.uuid)"
+              >
+                <i class="fa-solid fa-gear"></i>
               </button>
 
               <button

@@ -38,18 +38,22 @@ const missingKey = {
 };
 
 const start_robot = (args) => {
-  const { hooks } = args;
+  const { hooks, ratio } = args;
   const clicks = hooks.filter((d) => d.type == "mousedown");
   hooks.splice(hooks.indexOf(clicks[clicks.length - 1]), 3);
   for (var hook of hooks) {
+    if (ratio) {
+      hook.x = hook.x + ratio.window.xDiff;
+      hook.y = hook.y + ratio.window.yDiff;
+    }
     switch (hook.type) {
       case "mousemove": {
-        wait(hook.wait_time * 0.9);
+        wait(hook.wait_time * 1.02);
         robot.moveMouse(hook.x, hook.y);
         break;
       }
       case "mousewheel": {
-        wait(hook.wait_time * 0.9);
+        wait(hook.wait_time * 1.02);
         robot.scrollMouse(0, -hook.rotation * hook.amount * 40);
         break;
       }
@@ -61,26 +65,26 @@ const start_robot = (args) => {
         break;
       }
       case "mousedown": {
-        wait(hook.wait_time * 0.9);
+        wait(hook.wait_time * 1.02);
         const clickType =
           hook.button == 1 ? "left" : hook.button == 2 ? "right" : "middle";
         robot.mouseToggle("down", clickType);
         break;
       }
       case "mouseup": {
-        wait(hook.wait_time * 0.9);
+        wait(hook.wait_time * 1.02);
         const clickType =
           hook.button == 1 ? "left" : hook.button == 2 ? "right" : "middle";
         robot.mouseToggle("up", clickType);
         break;
       }
       case "mousedrag": {
-        wait(hook.wait_time * 0.9);
+        wait(hook.wait_time * 1.02);
         robot.dragMouse(hook.x, hook.y);
         break;
       }
       case "keyup": {
-        wait(hook.wait_time * 0.9);
+        wait(hook.wait_time * 1.02);
 
         const modifier = [];
 
@@ -104,7 +108,7 @@ const start_robot = (args) => {
         break;
       }
       case "keydown": {
-        wait(hook.wait_time * 0.9);
+        wait(hook.wait_time * 1.02);
 
         const modifier = [];
 
@@ -132,7 +136,7 @@ const start_robot = (args) => {
         break;
       }
       default: {
-        wait(hook.wait_time * 0.9);
+        wait(hook.wait_time * 1.02);
       }
     }
   }

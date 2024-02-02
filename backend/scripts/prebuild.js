@@ -23,6 +23,10 @@ spawnSync(platform == "linux" ? "npm" : "npm.cmd", ["run", "rebuild:sqlite"], {
   cwd: `../${target}`,
 });
 
+// spawnSync(platform == "linux" ? "npm" : "npm.cmd", ["run", "rebuild:canvas"], {
+//   cwd: `../${target}`,
+// });
+
 fs.copySync(path.resolve(`./public`), path.resolve(`../${target}/public`));
 fs.copySync(path.resolve(`./worker`), path.resolve(`../${target}/worker`));
 fs.copyFileSync(
@@ -33,3 +37,5 @@ fs.copyFileSync(
   path.resolve(`./config.json`),
   path.resolve(`../${target}/config.json`)
 );
+
+fs.copySync(path.resolve(`./assets`), path.resolve(`../${target}/assets`));

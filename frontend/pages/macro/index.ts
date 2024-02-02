@@ -11,9 +11,11 @@ window.Alpine = Alpine;
 interface IHeader {
   init: () => void;
   title: string;
+  selectedProcess: string;
   exit: () => void;
   minimize: () => void;
   maximize: () => void;
+  focusProcess: () => void;
 }
 
 type Item = {
@@ -33,7 +35,7 @@ interface IElectron {
   loadItems: () => void;
   getResultImage: (item: any) => void;
 
-  showSettingWindow: () => void;
+  showSettingWindow: (uuid: string) => void;
 }
 
 interface IBody {
@@ -45,7 +47,7 @@ interface IFooter {
   init: () => void;
   setting: boolean;
   snapshot: () => void;
-  play: (list: string[] | undefined, isAll?: boolean) => void;
+  play: (list: string[] | undefined, isAll?: boolean, isTest?: boolean) => void;
   save: (args: {
     type: "new" | "update" | "remove";
     uuid: string;
@@ -71,6 +73,11 @@ const { handler: HeaderViewModel } = registViewModel<IHeader>({
     HeaderViewModel.reset();
   },
   title: "AUTO CAPTURE SYSTEM",
+  selectedProcess: "",
+  async focusProcess() {
+    const result = await ipcRenderer.invoke("focusProcess");
+    this.selectedProcess = result;
+  },
   exit: async () => {
     await ipcRenderer.invoke("exit");
   },
@@ -84,11 +91,12 @@ const { handler: HeaderViewModel } = registViewModel<IHeader>({
 
 const { handler: ElectronViewModel } = registViewModel<IElectron>({
   init() {
-    document.addEventListener("keyup", (e) => {
-      if (e.ctrlKey && e.key == "t") {
-        this.toggleCapture();
-      }
-    });
+    // document.addEventListener("keyup", (e) => {
+    //   if (e.ctrlKey && e.key == "t") {
+    //     ElectronViewModel.state.toggleCapture();
+    //     // this.toggleCapture();
+    //   }
+    // });
     ElectronViewModel.property = this;
     ElectronViewModel.reset();
     this.loadItems();
@@ -120,14 +128,14 @@ const { handler: ElectronViewModel } = registViewModel<IElectron>({
   },
   async getResultImage(item: any) {
     FooterViewModel.property.setting = false;
-    const result = await ipcRenderer.invoke(
-      "getResultImage",
-      JSON.parse(JSON.stringify(item))
-    );
+    const result = await ipcRenderer.invoke("getResultImage", {
+      sceneName: ElectronViewModel.state.sceneName,
+      item: JSON.parse(JSON.stringify(item)),
+    });
     BodyViewModel.property.diffImage = result;
   },
-  async showSettingWindow() {
-    await ipcRenderer.invoke("settingWindow", { query: "test" });
+  async showSettingWindow(uuid: string) {
+    await ipcRenderer.invoke("showSettingWindow", { uuid: uuid });
   },
 });
 
@@ -139,11 +147,12 @@ let { handler: FooterViewModel } = registViewModel<IFooter>({
   snapshot: async () => {
     await ipcRenderer.invoke("capture");
   },
-  async play(list: string[] | undefined, isAll?: boolean) {
+  async play(list: string[] | undefined, isAll?: boolean, isTest?: boolean) {
     this.setting = false;
     await ipcRenderer.invoke("play", {
       list: list,
       sceneName: isAll ? ElectronViewModel.state.sceneName : undefined,
+      isTest: isTest,
     });
     await ElectronViewModel.property.loadItems();
     if (list != undefined) {
@@ -167,7 +176,8 @@ let { handler: FooterViewModel } = registViewModel<IFooter>({
   },
   async saveScene() {
     await ipcRenderer.invoke("saveScene", ElectronViewModel.state.sceneName);
-    ElectronViewModel.state.sceneName = "";
+    alert("시나리오가 저장되었습니다.");
+    // ElectronViewModel.state.sceneName = "";
   },
   async loadScene() {
     const test = await ipcRenderer.invoke(

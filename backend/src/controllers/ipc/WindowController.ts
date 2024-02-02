@@ -1,6 +1,6 @@
 import { BrowserWindow, ipcMain } from "electron";
 
-export default (window: BrowserWindow) => {
+export default (window: BrowserWindow, settingWindow: BrowserWindow) => {
   let currentThrough = false;
 
   ipcMain.handle("exit", (event, args) => {
@@ -17,6 +17,14 @@ export default (window: BrowserWindow) => {
     } else {
       window.maximize();
     }
+  });
+
+  ipcMain.handle("showSettingWindow", async (event, args) => {
+    settingWindow.webContents.send("uuid", args.uuid);
+    settingWindow.show();
+  });
+  ipcMain.handle("hideSettingWindow", async (event, args) => {
+    settingWindow.hide();
   });
 
   ipcMain.handle("click-through", async (event, args) => {

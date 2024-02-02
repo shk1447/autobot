@@ -13,6 +13,7 @@ import WindowController from "@app/src/controllers/ipc/WindowController";
 import HookController from "@app/src/controllers/ipc/HookController";
 import { HttpController } from "@app/src/controllers/http";
 import configure from "@app/src/configure";
+import SettingWindowController from "@app/src/controllers/ipc/SettingWindowController";
 
 const config = configure();
 
@@ -69,6 +70,46 @@ function createMainWindow() {
   return mainWindow;
 }
 
+function createSettingsWindow() {
+  // Create the browser window.
+  const settingWindow = new BrowserWindow({
+    width: 460,
+    height: 720,
+    minWidth: 460,
+    minHeight: 720,
+    transparent: true,
+    kiosk: false,
+    fullscreen: false,
+    fullscreenable: true,
+    resizable: true,
+    frame: false,
+    show: true,
+    webPreferences: {
+      preload: path.resolve(app.getAppPath(), "../app/public/preload.js"),
+      experimentalFeatures: true,
+      nodeIntegration: true,
+      nodeIntegrationInWorker: false,
+      contextIsolation: false,
+      webSecurity: false,
+      sandbox: false,
+      enableRemoteModule: true,
+    },
+    alwaysOnTop: true,
+  });
+  // and load the index.html of the app.
+  settingWindow.loadFile(
+    path.resolve(app.getAppPath(), "../app/setting/index.html")
+  );
+
+  settingWindow.setAlwaysOnTop(true, "screen-saver");
+  settingWindow.setVisibleOnAllWorkspaces(true);
+
+  // Open the DevTools.
+  // mainWindow.webContents.openDevTools();
+
+  return settingWindow;
+}
+
 const main = async () => {
   app.on("window-all-closed", function () {
     if (process.platform !== "darwin") app.quit();
@@ -78,9 +119,12 @@ const main = async () => {
   await ModuleManager.initialize();
 
   const window = createMainWindow();
+  const settingWindow = createSettingsWindow();
+  settingWindow.hide();
 
-  WindowController(window);
+  WindowController(window, settingWindow);
   HookController(window);
+  // SettingWindowController(settingWindow);
   new HttpController();
 };
 
